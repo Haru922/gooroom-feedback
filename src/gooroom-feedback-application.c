@@ -42,7 +42,9 @@ GooroomFeedbackApp *
 gooroom_feedback_app_new (void)
 {
   return g_object_new (GOOROOM_FEEDBACK_APP_TYPE,
-                       "application-id", "kr.gooroom.gooroom-feedback",
-                       "flags", G_APPLICATION_HANDLES_OPEN,
+                       "application-id",
+                       "kr.gooroom.gooroom-feedback",
+                       "flags",
+                       G_APPLICATION_HANDLES_OPEN,
                        NULL);
 }

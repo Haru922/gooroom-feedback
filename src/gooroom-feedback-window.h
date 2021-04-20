@@ -7,6 +7,7 @@
 #include "gooroom-feedback-application.h"
 
 #define GOOROOM_FEEDBACK_APP_WINDOW_TYPE (gooroom_feedback_app_window_get_type ())
+#define GOOROOM_FEEDBACK_WINDOW_UI "/kr/gooroom/gooroom-feedback/gooroom-feedback.ui"
 G_DECLARE_FINAL_TYPE (GooroomFeedbackAppWindow, gooroom_feedback_app_window, GOOROOM_FEEDBACK, APP_WINDOW, GtkApplicationWindow)
 
 GooroomFeedbackAppWindow *gooroom_feedback_app_window_new (GooroomFeedbackApp *app);
