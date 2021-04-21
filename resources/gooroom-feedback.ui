@@ -73,7 +73,7 @@ with Gooroom OS.</property>
                 <property name="border_width">5</property>
                 <child>
                   <object class="GtkLabel" id="gfb_title_label">
-                    <property name="width_request">100</property>
+                    <property name="width_request">80</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_right">10</property>
@@ -114,7 +114,7 @@ with Gooroom OS.</property>
                 <property name="border_width">5</property>
                 <child>
                   <object class="GtkLabel" id="gfb_category_label">
-                    <property name="width_request">100</property>
+                    <property name="width_request">80</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_right">10</property>
@@ -177,7 +177,7 @@ with Gooroom OS.</property>
                 <property name="border_width">5</property>
                 <child>
                   <object class="GtkLabel" id="gfb_description_label">
-                    <property name="width_request">100</property>
+                    <property name="width_request">80</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_right">10</property>

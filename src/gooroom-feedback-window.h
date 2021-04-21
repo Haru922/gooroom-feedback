@@ -5,6 +5,7 @@
 #include <gio/gio.h>
 #include <glib/gi18n.h>
 #include "gooroom-feedback-application.h"
+#include "gooroom-feedback-utils.h"
 
 #define GOOROOM_FEEDBACK_APP_WINDOW_TYPE (gooroom_feedback_app_window_get_type ())
 #define GOOROOM_FEEDBACK_WINDOW_UI "/kr/gooroom/gooroom-feedback/gooroom-feedback.ui"

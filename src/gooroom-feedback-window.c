@@ -26,8 +26,11 @@ gfb_submit_button_clicked (GtkButton *widget,
   gchar *title = NULL;
   gchar *description = NULL;
   gchar *category = NULL;
+  gchar *release = NULL;
+  gchar *code_name = NULL;
   GtkTextIter start_iter;
   GtkTextIter end_iter;
+  GtkWidget *dialog = NULL;
 
   priv = gooroom_feedback_app_window_get_instance_private (GOOROOM_FEEDBACK_APP_WINDOW (user_data));
 
@@ -46,8 +49,50 @@ gfb_submit_button_clicked (GtkButton *widget,
                                           &start_iter,
                                           &end_iter,
                                           FALSE);
+
+  gfb_get_os_info (&release, &code_name);
+
+  g_print ("title: %s\ncategory: %s\ndescription: %s\nrelease: %s\ncode name: %s\n",
+           title, category, description, release, code_name);
+
   g_free (description);
+  if (release)
+    free (release);
+  if (code_name)
+    free (code_name);
+
   // TODO: Submit
+
+  if (strlen (title))
+  {
+    dialog = gtk_message_dialog_new (GOOROOM_FEEDBACK_APP_WINDOW (user_data),
+                                     GTK_DIALOG_DESTROY_WITH_PARENT,
+                                     GTK_MESSAGE_INFO,
+                                     GTK_BUTTONS_CLOSE,
+                                     "\nThanks for taking the time to give us feedback.\n",
+                                     NULL);
+    gtk_window_set_title (GTK_WINDOW (dialog),
+                          "Gooroom Feedback");
+    g_signal_connect_swapped (dialog, "response",
+                              G_CALLBACK (gtk_widget_destroy),
+                              GOOROOM_FEEDBACK_APP_WINDOW (user_data));
+  }
+  else
+  {
+    dialog = gtk_message_dialog_new (GOOROOM_FEEDBACK_APP_WINDOW (user_data),
+                                     GTK_DIALOG_DESTROY_WITH_PARENT,
+                                     GTK_MESSAGE_INFO,
+                                     GTK_BUTTONS_CLOSE,
+                                     "\nPlease provide us more detailed information of your feedback.\n",
+                                     NULL);
+    gtk_window_set_title (GTK_WINDOW (dialog),
+                          "Gooroom Feedback");
+    g_signal_connect_swapped (dialog, "response",
+                              G_CALLBACK (gtk_widget_destroy),
+                              dialog);
+  }
+
+  gtk_dialog_run (GTK_DIALOG (dialog));
 }
 
 static void
