@@ -14,6 +14,7 @@ struct _GooroomFeedbackAppWindowPrivate
   GtkWidget *gfb_description_buffer;
   GtkWidget *gfb_button_submit;
   GtkWidget *gfb_button_cancel;
+  GtkWidget *gfb_log_view;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (GooroomFeedbackAppWindow, gooroom_feedback_app_window, GTK_TYPE_APPLICATION_WINDOW);
@@ -146,6 +147,9 @@ gooroom_feedback_app_window_class_init (GooroomFeedbackAppWindowClass *class)
   gtk_widget_class_bind_template_child_private (GTK_WIDGET_CLASS (class),
                                                 GooroomFeedbackAppWindow,
                                                 gfb_button_cancel);
+  gtk_widget_class_bind_template_child_private (GTK_WIDGET_CLASS (class),
+                                                GooroomFeedbackAppWindow,
+                                                gfb_log_view);
 }
 
 GooroomFeedbackAppWindow *
