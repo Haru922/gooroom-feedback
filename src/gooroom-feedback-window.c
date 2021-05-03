@@ -14,7 +14,7 @@ struct _GooroomFeedbackAppWindowPrivate
   GtkWidget *gfb_description_buffer;
   GtkWidget *gfb_button_submit;
   GtkWidget *gfb_button_cancel;
-  GtkWidget *gfb_log_view;
+  GtkWidget *gfb_history_window;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (GooroomFeedbackAppWindow, gooroom_feedback_app_window, GTK_TYPE_APPLICATION_WINDOW);
@@ -104,6 +104,8 @@ gooroom_feedback_app_window_init (GooroomFeedbackAppWindow *win)
   priv = gooroom_feedback_app_window_get_instance_private (win);
   gtk_widget_init_template (GTK_WIDGET (win));
 
+  gooroom_feedback_history_view_init (priv->gfb_history_window);
+
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->gfb_category_button_problem),
                                 TRUE);
   g_signal_connect (priv->gfb_button_submit,
@@ -146,10 +148,10 @@ gooroom_feedback_app_window_class_init (GooroomFeedbackAppWindowClass *class)
                                                 gfb_button_submit);
   gtk_widget_class_bind_template_child_private (GTK_WIDGET_CLASS (class),
                                                 GooroomFeedbackAppWindow,
-                                                gfb_button_cancel);
+                                                gfb_history_window);
   gtk_widget_class_bind_template_child_private (GTK_WIDGET_CLASS (class),
                                                 GooroomFeedbackAppWindow,
-                                                gfb_log_view);
+                                                gfb_button_cancel);
 }
 
 GooroomFeedbackAppWindow *

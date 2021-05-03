@@ -12,6 +12,7 @@ gooroom_feedback_sources = [
   'src/gooroom-feedback-application.c',
   'src/gooroom-feedback-window.c',
   'src/gooroom-feedback-utils.c',
+  'src/gooroom-feedback-history-view.c',
   'src/gooroom-feedback-main.c'
 ]
 
