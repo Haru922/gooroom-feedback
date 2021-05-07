@@ -44,3 +44,31 @@ gfb_get_os_info (char **release,
 
   return ret;
 }
+
+gboolean
+gfb_post_request (const char *title,
+                  char *category,
+                  char *release,
+                  char *code_name,
+                  char *description)
+{
+  CURL *curl;
+  CURLcode res;
+  char feedback[BUFSIZ] = { 0, };
+  char *feedback_fmt = "title=%s&category=%s&release=%s&code_name=%s&description=%s";
+  gboolean ret = TRUE;
+
+  curl = curl_easy_init ();
+  if (curl) {
+    curl_easy_setopt (curl, CURLOPT_URL, GFB_PROXY_SERVER_URL);
+    curl_easy_setopt (curl, CURLOPT_POST, 1L);
+    snprintf (feedback, BUFSIZ, feedback_fmt, title, category, release, code_name, description);
+    printf ("%s\n", feedback);
+    curl_easy_setopt (curl, CURLOPT_POSTFIELDS, feedback);
+    res = curl_easy_perform (curl);
+    curl_easy_cleanup (curl);
+    if (res != CURLE_OK)
+      ret = FALSE;
+  }
+  return ret;
+}

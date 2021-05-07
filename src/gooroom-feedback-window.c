@@ -24,14 +24,21 @@ gfb_submit_button_clicked (GtkButton *widget,
                            gpointer   user_data)
 {
   GooroomFeedbackAppWindowPrivate *priv = NULL;
-  gchar *title = NULL;
+  gboolean response = TRUE;
+  const gchar *title = NULL;
   gchar *description = NULL;
   gchar *category = NULL;
   gchar *release = NULL;
   gchar *code_name = NULL;
+  gchar *response_msg = NULL;
+  gchar *server_response = NULL;
   GtkTextIter start_iter;
   GtkTextIter end_iter;
   GtkWidget *dialog = NULL;
+  FILE *history = NULL;
+  time_t temp;
+  struct tm *time_ptr = NULL;
+  char time_str[100] = { 0, };
 
   priv = gooroom_feedback_app_window_get_instance_private (GOOROOM_FEEDBACK_APP_WINDOW (user_data));
 
@@ -56,21 +63,46 @@ gfb_submit_button_clicked (GtkButton *widget,
   g_print ("title: %s\ncategory: %s\ndescription: %s\nrelease: %s\ncode name: %s\n",
            title, category, description, release, code_name);
 
+/*
   g_free (description);
   if (release)
     free (release);
   if (code_name)
     free (code_name);
+*/
 
   // TODO: Submit
 
   if (strlen (title))
   {
-    dialog = gtk_message_dialog_new (GOOROOM_FEEDBACK_APP_WINDOW (user_data),
+    temp = time (NULL);
+    time_ptr = localtime (&temp);
+    strftime (time_str, sizeof (time_str), "%F %T", time_ptr);
+    history = fopen (GFB_HISTORY, "a");
+    response = gfb_post_request (title, category, release, code_name, description);
+    if (response)
+    {
+      server_response = "SUCCESS";
+      response_msg = "\nThanks for taking the time to give us feedback.\n";
+    }
+    else
+    {
+      server_response = "FAILURE";
+      response_msg = "\nFAILURE.\n";
+    }
+    fprintf (history, "%s::%s::%s\n",
+            time_str, title, server_response);
+    fclose (history);
+    g_free (description);
+    if (release)
+        free (release);
+    if (code_name)
+        free (code_name);
+    dialog = gtk_message_dialog_new (GTK_WINDOW (user_data),
                                      GTK_DIALOG_DESTROY_WITH_PARENT,
                                      GTK_MESSAGE_INFO,
                                      GTK_BUTTONS_CLOSE,
-                                     "\nThanks for taking the time to give us feedback.\n",
+                                     response_msg,
                                      NULL);
     gtk_window_set_title (GTK_WINDOW (dialog),
                           "Gooroom Feedback");
@@ -80,11 +112,12 @@ gfb_submit_button_clicked (GtkButton *widget,
   }
   else
   {
-    dialog = gtk_message_dialog_new (GOOROOM_FEEDBACK_APP_WINDOW (user_data),
+    response_msg = "\nPlease provide us more detailed information of your feedback.\n";
+    dialog = gtk_message_dialog_new (GTK_WINDOW (user_data),
                                      GTK_DIALOG_DESTROY_WITH_PARENT,
                                      GTK_MESSAGE_INFO,
                                      GTK_BUTTONS_CLOSE,
-                                     "\nPlease provide us more detailed information of your feedback.\n",
+                                     response_msg,
                                      NULL);
     gtk_window_set_title (GTK_WINDOW (dialog),
                           "Gooroom Feedback");
@@ -100,9 +133,14 @@ static void
 gooroom_feedback_app_window_init (GooroomFeedbackAppWindow *win)
 {
   GooroomFeedbackAppWindowPrivate *priv = NULL;
+  GtkEntryBuffer *buffer = NULL;
 
   priv = gooroom_feedback_app_window_get_instance_private (win);
   gtk_widget_init_template (GTK_WIDGET (win));
+
+  buffer = gtk_entry_get_buffer (GTK_ENTRY (priv->gfb_title_entry));
+  gtk_entry_buffer_set_max_length (buffer,
+                                   GFB_TITLE_LEN);
 
   gooroom_feedback_history_view_init (priv->gfb_history_window);
 

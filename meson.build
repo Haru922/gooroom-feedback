@@ -7,6 +7,7 @@ gnome = import('gnome')
 gtk_dep = dependency('gtk+-3.0')
 glib_dep = dependency('glib-2.0')
 gio_dep = dependency('gio-2.0')
+curl_dep = dependency('libcurl')
 
 gooroom_feedback_sources = [
   'src/gooroom-feedback-application.c',
@@ -25,7 +26,7 @@ gooroom_feedback_sources += gnome.compile_resources(
 gooroom_feedback = executable(
   'gooroom-feedback',
   gooroom_feedback_sources,
-  dependencies: [gtk_dep, glib_dep, gio_dep],
+  dependencies: [gtk_dep, glib_dep, gio_dep, curl_dep],
 )
 
 po_dir = join_paths(meson.source_root(), 'po')

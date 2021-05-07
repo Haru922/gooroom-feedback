@@ -3,11 +3,12 @@
 
 #include <gtk/gtk.h>
 
-#define GFB_HISTORY "/var/log/gooroom-feedback/history.log"
+#define GFB_HISTORY "/home/haru/feedback.log"
 
 enum _gfb_history_column {
   GFB_HISTORY_DATE,
   GFB_HISTORY_TITLE,
+  GFB_HISTORY_RESULT,
   //GFB_HISTORY_TYPE,
   //GFB_HISTORY_OS,
   GFB_HISTORY_COLUMNS
@@ -15,7 +16,8 @@ enum _gfb_history_column {
 
 static char *column_names[] = {
   "DATE",
-  "TITLE"
+  "TITLE",
+  "RESULT"
   //"TYPE",
   //"OS"
 };
