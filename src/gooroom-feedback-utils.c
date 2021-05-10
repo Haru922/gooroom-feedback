@@ -46,7 +46,8 @@ gfb_get_os_info (char **release,
 }
 
 gboolean
-gfb_post_request (const char *title,
+gfb_post_request (char *server_url,
+                  const char *title,
                   char *category,
                   char *release,
                   char *code_name,
@@ -60,7 +61,7 @@ gfb_post_request (const char *title,
 
   curl = curl_easy_init ();
   if (curl) {
-    curl_easy_setopt (curl, CURLOPT_URL, GFB_PROXY_SERVER_URL);
+    curl_easy_setopt (curl, CURLOPT_URL, server_url);
     curl_easy_setopt (curl, CURLOPT_POST, 1L);
     snprintf (feedback, BUFSIZ, feedback_fmt, title, category, release, code_name, description);
     printf ("%s\n", feedback);

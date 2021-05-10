@@ -11,6 +11,7 @@
 
 #define GOOROOM_FEEDBACK_APP_WINDOW_TYPE (gooroom_feedback_app_window_get_type ())
 #define GOOROOM_FEEDBACK_WINDOW_UI "/kr/gooroom/gooroom-feedback/gooroom-feedback.ui"
+#define GFB_CONF "/etc/gooroom/gooroom-feedback/gooroom-feedback.conf"
 #define GFB_TITLE_LEN 25
 G_DECLARE_FINAL_TYPE (GooroomFeedbackAppWindow, gooroom_feedback_app_window, GOOROOM_FEEDBACK, APP_WINDOW, GtkApplicationWindow)
 

@@ -1,8 +1,8 @@
 #include "gooroom-feedback-history-view.h"
-#include <pwd.h>
 
 void
-gooroom_feedback_history_view_init (GtkWidget *gfb_history_window)
+gooroom_feedback_history_view_init (GtkWidget *gfb_history_window,
+                                    char      *gfb_history)
 {
   GtkWidget *gfb_history_view;
   GtkCellRenderer *renderer;
@@ -31,12 +31,13 @@ gooroom_feedback_history_view_init (GtkWidget *gfb_history_window)
   gtk_container_add (GTK_CONTAINER (gfb_history_window), GTK_WIDGET (gfb_history_view));
   g_object_unref (gfb_history_store);
 
-  gooroom_feedback_history_view_get_items (GTK_WIDGET (gfb_history_view));
+  gooroom_feedback_history_view_get_items (GTK_WIDGET (gfb_history_view), gfb_history);
   gtk_widget_show_all (GTK_WIDGET (gfb_history_view));
 }
 
 void
-gooroom_feedback_history_view_get_items (GtkWidget *gfb_history_view)
+gooroom_feedback_history_view_get_items (GtkWidget *gfb_history_view,
+                                         char      *gfb_history)
 {
   GtkListStore *gfb_history_store;
   GtkTreeIter iter;
@@ -50,7 +51,7 @@ gooroom_feedback_history_view_get_items (GtkWidget *gfb_history_view)
   pw = getpwuid (uid);
 
   gfb_history_store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gfb_history_view)));
-  if (fp = fopen (GFB_HISTORY, "r"))
+  if (fp = fopen (gfb_history, "r"))
   {
     while (fgets (history, BUFSIZ, fp))
     {

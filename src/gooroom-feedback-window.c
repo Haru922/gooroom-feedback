@@ -15,6 +15,8 @@ struct _GooroomFeedbackAppWindowPrivate
   GtkWidget *gfb_button_submit;
   GtkWidget *gfb_button_cancel;
   GtkWidget *gfb_history_window;
+  gchar *server_url;
+  gchar *gfb_history;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (GooroomFeedbackAppWindow, gooroom_feedback_app_window, GTK_TYPE_APPLICATION_WINDOW);
@@ -63,14 +65,6 @@ gfb_submit_button_clicked (GtkButton *widget,
   g_print ("title: %s\ncategory: %s\ndescription: %s\nrelease: %s\ncode name: %s\n",
            title, category, description, release, code_name);
 
-/*
-  g_free (description);
-  if (release)
-    free (release);
-  if (code_name)
-    free (code_name);
-*/
-
   // TODO: Submit
 
   if (strlen (title))
@@ -78,8 +72,8 @@ gfb_submit_button_clicked (GtkButton *widget,
     temp = time (NULL);
     time_ptr = localtime (&temp);
     strftime (time_str, sizeof (time_str), "%F %T", time_ptr);
-    history = fopen (GFB_HISTORY, "a");
-    response = gfb_post_request (title, category, release, code_name, description);
+    history = fopen (priv->gfb_history, "a");
+    response = gfb_post_request (priv->server_url, title, category, release, code_name, description);
     if (response)
     {
       server_response = "SUCCESS";
@@ -134,15 +128,23 @@ gooroom_feedback_app_window_init (GooroomFeedbackAppWindow *win)
 {
   GooroomFeedbackAppWindowPrivate *priv = NULL;
   GtkEntryBuffer *buffer = NULL;
+  GKeyFile *key_file = g_key_file_new ();
 
   priv = gooroom_feedback_app_window_get_instance_private (win);
   gtk_widget_init_template (GTK_WIDGET (win));
+
+  if (g_key_file_load_from_file (key_file, GFB_CONF, G_KEY_FILE_NONE, NULL))
+  {
+    priv->server_url = g_key_file_get_string (key_file, "SERVER", "address", NULL);
+    priv->gfb_history = g_key_file_get_string (key_file, "SERVER", "history", NULL);
+    g_key_file_free (key_file);
+  }
 
   buffer = gtk_entry_get_buffer (GTK_ENTRY (priv->gfb_title_entry));
   gtk_entry_buffer_set_max_length (buffer,
                                    GFB_TITLE_LEN);
 
-  gooroom_feedback_history_view_init (priv->gfb_history_window);
+  gooroom_feedback_history_view_init (priv->gfb_history_window, priv->gfb_history);
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->gfb_category_button_problem),
                                 TRUE);

@@ -7,9 +7,8 @@
 #include <curl/curl.h>
 
 #define GOOROOM_OS_INFO "/etc/gooroom/info"
-#define GFB_PROXY_SERVER_URL "http://127.0.0.1:8000/feedback/new/"
 
-int gfb_get_os_info (char **release, char **code_name);
-gboolean gfb_post_request (const char *title, char *category, char *release, char *code_name, char *description);
+int      gfb_get_os_info  (char **release, char **code_name);
+gboolean gfb_post_request (char *server_url, const char *title, char *category, char *release, char *code_name, char *description);
 
 #endif
