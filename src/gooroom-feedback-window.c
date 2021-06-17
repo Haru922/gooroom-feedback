@@ -74,7 +74,7 @@ gfb_submit_button_clicked (GtkButton *widget,
     strftime (time_str, sizeof (time_str), "%F %T", time_ptr);
     history = fopen (priv->gfb_history, "a");
     response = gfb_post_request (priv->server_url, title, category, release, code_name, description);
-    if (response)
+    if (response == GFB_RESPONSE_SUCCESS)
     {
       server_response = "SUCCESS";
       response_msg = "\nThanks for taking the time to give us feedback.\n";
@@ -92,33 +92,28 @@ gfb_submit_button_clicked (GtkButton *widget,
         free (release);
     if (code_name)
         free (code_name);
-    dialog = gtk_message_dialog_new (GTK_WINDOW (user_data),
-                                     GTK_DIALOG_DESTROY_WITH_PARENT,
-                                     GTK_MESSAGE_INFO,
-                                     GTK_BUTTONS_CLOSE,
-                                     response_msg,
-                                     NULL);
-    gtk_window_set_title (GTK_WINDOW (dialog),
-                          "Gooroom Feedback");
+  }
+  else
+    response_msg = "\nPlease provide us more detailed information of your feedback.\n";
+
+  dialog = gtk_message_dialog_new (GTK_WINDOW (user_data),
+                                   GTK_DIALOG_DESTROY_WITH_PARENT,
+                                   GTK_MESSAGE_INFO,
+                                   GTK_BUTTONS_CLOSE,
+                                   response_msg,
+                                   NULL);
+
+  gtk_window_set_title (GTK_WINDOW (dialog),
+                        "Gooroom Feedback");
+
+  if (response == GFB_RESPONSE_SUCCESS)
     g_signal_connect_swapped (dialog, "response",
                               G_CALLBACK (gtk_widget_destroy),
                               GOOROOM_FEEDBACK_APP_WINDOW (user_data));
-  }
   else
-  {
-    response_msg = "\nPlease provide us more detailed information of your feedback.\n";
-    dialog = gtk_message_dialog_new (GTK_WINDOW (user_data),
-                                     GTK_DIALOG_DESTROY_WITH_PARENT,
-                                     GTK_MESSAGE_INFO,
-                                     GTK_BUTTONS_CLOSE,
-                                     response_msg,
-                                     NULL);
-    gtk_window_set_title (GTK_WINDOW (dialog),
-                          "Gooroom Feedback");
     g_signal_connect_swapped (dialog, "response",
                               G_CALLBACK (gtk_widget_destroy),
                               dialog);
-  }
 
   gtk_dialog_run (GTK_DIALOG (dialog));
 }

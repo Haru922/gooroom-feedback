@@ -45,7 +45,7 @@ gfb_get_os_info (char **release,
   return ret;
 }
 
-gboolean
+int
 gfb_post_request (char *server_url,
                   const char *title,
                   char *category,
@@ -55,21 +55,30 @@ gfb_post_request (char *server_url,
 {
   CURL *curl;
   CURLcode res;
+  struct curl_slist *list = NULL;
   char feedback[BUFSIZ] = { 0, };
-  char *feedback_fmt = "title=%s&category=%s&release=%s&code_name=%s&description=%s";
-  gboolean ret = TRUE;
+  char *feedback_fmt = "title=%s&"
+                       "category=%s&"
+                       "release=%s&"
+                       "codename=%s&"
+                       "description=%s";
+  int ret = GFB_RESPONSE_SUCCESS;
 
   curl = curl_easy_init ();
+  curl_slist_append (list, "Content-Type: application/json");
   if (curl) {
     curl_easy_setopt (curl, CURLOPT_URL, server_url);
+    curl_easy_setopt (curl, CURLOPT_HTTPHEADER, list);
     curl_easy_setopt (curl, CURLOPT_POST, 1L);
-    snprintf (feedback, BUFSIZ, feedback_fmt, title, category, release, code_name, description);
+    snprintf (feedback, BUFSIZ, feedback_fmt,
+              title, category, release, code_name, description);
     printf ("%s\n", feedback);
     curl_easy_setopt (curl, CURLOPT_POSTFIELDS, feedback);
     res = curl_easy_perform (curl);
     curl_easy_cleanup (curl);
+    curl_slist_free_all (list);
     if (res != CURLE_OK)
-      ret = FALSE;
+      ret = GFB_RESPONSE_FAILURE;
   }
   return ret;
 }
