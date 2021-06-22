@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	//"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -15,6 +15,11 @@ import (
 	"sync"
 	"syscall"
 	"time"
+)
+
+const (
+	BACKUP_COUNT   = 5
+	MAX_FILE_BYTES = 2 * 1024
 )
 
 var counter = struct {
@@ -28,6 +33,8 @@ var expireTime = struct {
 	month time.Month
 	day   int
 }{}
+
+var logger *log.Logger
 
 type Feedback struct {
 	Title       string `json:"title"`
@@ -46,85 +53,85 @@ type Issue struct {
 
 func resetCounter() {
 	counter.Lock()
-	for ip := range counter.visited {
-		delete(counter.visited, ip)
-	}
-	counter.Unlock()
+	defer counter.Unlock()
+	counter.visited = make(map[string]int)
 }
 
 func validateFeedback(r *http.Request) bool {
-	updateDate()
+	checkExpireTime()
 	counter.RLock()
 	n := counter.visited[r.RemoteAddr]
 	counter.RUnlock()
-	fmt.Println(r.RemoteAddr, n)
 	if n >= 10 {
 		return false
 	}
 	counter.Lock()
+	defer counter.Unlock()
 	counter.visited[r.RemoteAddr]++
-	counter.Unlock()
 	return true
 }
 
-func updateDate() {
+func checkExpireTime() {
 	expireTime.Lock()
+	defer expireTime.Unlock()
 	year, month, day := time.Now().Date()
 	if expireTime.year != year ||
 		expireTime.month != month ||
 		expireTime.day != day {
 		resetCounter()
-		expireTime.year = year
-		expireTime.month = month
-		expireTime.day = day
+		setExpireTimeNow()
 	}
-	expireTime.Unlock()
 }
 
 func issueHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("===issueHandler===")
-	fmt.Println("==================")
-	fmt.Printf("RemoteAddr: %s\n", r.RemoteAddr)
-	if r.Method == "POST" {
-		fmt.Printf("%s %s %s\n", r.Method, r.URL, r.Proto)
-		for k, v := range r.Header {
-			fmt.Printf("Header[%q] = %q\n", k, v)
+	/*
+		logger.Printf("RemoteAddr: %s\n", r.RemoteAddr) // DELETE
+		if r.Method == "POST" {
+		    logger.Println("===ISSUE===") // DELETE
+			logger.Printf("%s %s %s\n", r.Method, r.URL, r.Proto) // DELETE
+			for k, v := range r.Header { // DELETE
+				logger.Printf("%q = %q\n", k, v) // DELETE
+			} //DELETE
+			respBody, _ := ioutil.ReadAll(r.Body)
+			logger.Println(string(respBody)) // DELETE
+		    logger.Println("===========") // DELETE
 		}
-		respBody, _ := ioutil.ReadAll(r.Body)
-		fmt.Printf("Body: %s\n", string(respBody))
-	}
-	fmt.Println("==================")
+	*/
 }
 
 func feedbackHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("===feedbackHandler===")
-	fmt.Fprintf(w, "RemoteAddr: %s\n", r.RemoteAddr)
+	logger.Println("[STATE] Request Received.")
+	logger.Printf("Sender: %s\n", r.RemoteAddr)
 	if r.Method == "POST" {
 		if validateFeedback(r) {
-			// DEBUG
-			fmt.Println("validated.")
-			fmt.Fprintf(w, "%s %s %s\n", r.Method, r.URL, r.Proto)
+			logger.Println("[STATE] Request Validated.")
+			logger.Println("=========================== FEEDBACK ===========================")
+			logger.Printf("Method: %s, URL: %s, Proto: %s\n", r.Method, r.URL, r.Proto)
 			for k, v := range r.Header {
-				fmt.Fprintf(w, "Header[%q] = %q\n", k, v)
+				logger.Printf("%q = %q\n", k, v)
 			}
 			fb, err := getFeedback(r)
 			if err != nil {
+				//TODO
 			}
+			logger.Println(fb)
+			logger.Println("================================================================")
 			req, _ := makeRequest(fb)
-			// DEBUG
+			logger.Println("[STATE] Issue Created")
+			logger.Println("=========================== ISSUE ===========================")
 			for k, v := range req.Header {
-				fmt.Fprintf(w, "New Header[%q] = %q\n", k, v)
+				logger.Printf("%q = %q\n", k, v)
 			}
 			jfb, _ := json.Marshal(fb)
-			fmt.Fprintf(w, "\njson string: %s\n", string(jfb))
+			logger.Printf("%s\n", string(jfb))
+			logger.Println("=============================================================")
 			client := &http.Client{}
 			client.Do(req)
-            fmt.Println("issue requested")
+			logger.Println("[STATE] Issue Requested")
 		}
 	} else {
 		http.NotFound(w, r)
 	}
-	fmt.Println("=====================")
 }
 
 func makeRequest(fb *Feedback) (*http.Request, error) {
@@ -132,7 +139,6 @@ func makeRequest(fb *Feedback) (*http.Request, error) {
 	const BTS string = "http://www.feedback.gooroom.kr/api/rest/issues/"
 	jfb, _ := json.Marshal(fmt.Sprintf(`{"summary": "%s", "description": "%s", "category": {"name": "%s"}, "project": {"name": "%s"}}`,
 		fb.Title, fb.Description, fb.Category, "Gooroom Feedback"))
-	fmt.Println(string(jfb))
 	req, err := http.NewRequest("POST", BTS, bytes.NewBuffer(jfb))
 	defer req.Body.Close()
 	req.Header.Add("Authorization", TOKEN)
@@ -163,35 +169,48 @@ func getFeedback(r *http.Request) (*Feedback, error) {
 	return &Feedback{Title: title, Category: category, Release: release, Codename: codename, Description: description}, nil
 }
 
-func main() {
+func setExpireTimeNow() {
 	expireTime.Lock()
+	defer expireTime.Unlock()
 	expireTime.year, expireTime.month, expireTime.day = time.Now().Date()
-	expireTime.Unlock()
+}
+
+func main() {
+	setExpireTimeNow()
+
+	fp, err := os.OpenFile("gfb.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer fp.Close()
+
+	logger = log.New(fp, "", log.LstdFlags|log.Lshortfile)
 
 	srv := &http.Server{
-		Addr:         "127.0.0.1:8000",
-		WriteTimeout: time.Second * 15,
-		ReadTimeout:  time.Second * 15,
-		IdleTimeout:  time.Second * 60,
+		Addr:         ":8000",
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+		IdleTimeout:  60 * time.Second,
 		Handler:      nil,
 	}
 	http.HandleFunc("/gooroom/feedback/new", feedbackHandler)
 	http.HandleFunc("/api/rest/issues/", issueHandler)
 
 	idleConnsClosed := make(chan struct{})
+
 	go func() {
 		done := make(chan os.Signal, 1)
 		signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 		<-done
 
 		if err := srv.Shutdown(context.Background()); err != nil {
-			log.Printf("HTTP Server Shutdown: %v", err)
+			logger.Printf("HTTP Server Shutdown: %v", err)
 		}
 		close(idleConnsClosed)
 	}()
 
 	if err := srv.ListenAndServe(); err != nil {
-		log.Fatalf("HTTP Server ListenAndServe: %v", err)
+		logger.Fatalf("HTTP Server ListenAndServe: %v", err)
 	}
 
 	<-idleConnsClosed
