@@ -23,7 +23,6 @@ var counter = struct {
 }{visited: make(map[string]int)}
 
 var expireTime = struct {
-	sync.RWMutex
 	year  int
 	month time.Month
 	day   int
@@ -31,7 +30,6 @@ var expireTime = struct {
 }{}
 
 var logWriter = struct {
-    sync.RWMutex
     logger *log.Logger
     fp *os.File
 }{}
@@ -72,8 +70,6 @@ func validateFeedback(r *http.Request) bool {
 }
 
 func checkExpireTime() {
-	expireTime.Lock()
-	defer expireTime.Unlock()
 	year, month, day := time.Now().Date()
 	if expireTime.year != year ||
 		expireTime.month != month ||
@@ -199,6 +195,7 @@ func setLogWriterNow() {
 
 func gfbInit() {
     setExpireTimeNow()
+    resetCounter()
     setLogWriterNow()
 }
 
