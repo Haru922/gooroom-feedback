@@ -26,7 +26,7 @@ var expireTime = struct {
 	year  int
 	month time.Month
 	day   int
-    min int
+    min int // DELETE
 }{}
 
 var logWriter = struct {
@@ -96,40 +96,58 @@ func issueHandler(w http.ResponseWriter, r *http.Request) {
 */
 
 func feedbackHandler(w http.ResponseWriter, r *http.Request) {
-	logWriter.logger.Println("[STATE] Request Received.")
+	logWriter.logger.Println("[Gooroom-Feedback-Server] => Request Received.")
 	logWriter.logger.Printf("Sender: %s\n", r.RemoteAddr)
 	if r.Method == "POST" {
 		if validateFeedback(r) {
-			logWriter.logger.Println("[STATE] Request Validated.")
-			logWriter.logger.Println("=========================== FEEDBACK ===========================")
+			logWriter.logger.Println("[Gooroom-Feedback-Server] => Request Validated.")
+			logWriter.logger.Println("=========================== [FEEDBACK] ===========================")
 			logWriter.logger.Printf("Method: %s, URL: %s, Proto: %s\n", r.Method, r.URL, r.Proto)
 			for k, v := range r.Header {
 				logWriter.logger.Printf("%q = %q\n", k, v)
 			}
 			fb, err := getFeedback(r)
 			if err != nil {
-				//TODO
+			    logWriter.logger.Printf("[Gooroom-Feedback-Server] => %s\n", err)
+                w.WriteHeader(http.StatusBadRequest)
+                w.Write([]byte(http.StatusText(http.StatusBadRequest)))
+                return
 			}
 			logWriter.logger.Printf("%+v\n", fb)
-			logWriter.logger.Println("================================================================")
+			logWriter.logger.Println("==================================================================")
 			req, _ := makeRequest(fb)
-			logWriter.logger.Println("[STATE] Issue Created")
-			logWriter.logger.Println("=========================== ISSUE ===========================")
+			logWriter.logger.Println("[Gooroom-Feedback-Server] => Issue Created")
+			logWriter.logger.Println("=========================== [ISSUE] ===========================")
 			logWriter.logger.Printf("Method: %s, URL: %s, Proto: %s\n", req.Method, req.URL, req.Proto)
 			for k, v := range req.Header {
 				logWriter.logger.Printf("%q = %q\n", k, v)
 			}
 			jfb, _ := json.Marshal(fb)
 			logWriter.logger.Printf("%s\n", string(jfb))
-			logWriter.logger.Println("=============================================================")
+			logWriter.logger.Println("===============================================================")
 			client := &http.Client{}
-			client.Do(req)
-			logWriter.logger.Println("[STATE] Issue Requested")
+			resp, err := client.Do(req)
+			logWriter.logger.Println("[Gooroom-Feedback-Server] => Issue Requested")
+            w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+            fmt.Println(resp)
+            if err != nil {
+                logWriter.logger.Println("[Gooroom-Feedback-Server] => Internal Server Error.")
+                logWriter.logger.Println(err)
+                w.WriteHeader(http.StatusInternalServerError)
+                w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
+            } else {
+                w.WriteHeader(http.StatusOK)
+                w.Write([]byte(http.StatusText(http.StatusOK)))
+            }
 		} else {
-            logWriter.logger.Println("[STATE] Request Invalidated.")
+            logWriter.logger.Println("[Gooroom-Feedback-Server] => Request Invalidated.")
+            w.WriteHeader(http.StatusNotAcceptable)
+            w.Write([]byte(http.StatusText(http.StatusNotAcceptable)))
         }
 	} else {
-		http.NotFound(w, r)
+        logWriter.logger.Println("[Gooroom-Feedback-Server] => Not Allowed Method.")
+        w.WriteHeader(http.StatusMethodNotAllowed)
+        w.Write([]byte(http.StatusText(http.StatusMethodNotAllowed)))
 	}
 }
 
@@ -149,7 +167,7 @@ func getFeedback(r *http.Request) (*Feedback, error) {
 	var title, category, release, codename, description string
 	if err := r.ParseForm(); err != nil {
 		log.Print(err)
-		return nil, errors.New("Invalid Feedback Request.")
+		return nil, errors.New("Invalid Feedback.")
 	}
 	for k, v := range r.Form {
 		switch strings.ToLower(k) {
@@ -180,11 +198,9 @@ func setLogWriterNow() {
         }
     }
 
-    strv := []string{"gfb-", fmt.Sprintf("%d-%d-%d-%d", expireTime.year, expireTime.month, expireTime.day, expireTime.min), ".log"} // DELETE
-    //strv := []string{"gfb-", fmt.Sprintf("%d-%d-%d", expireTime.year, expireTime.month, expireTime.day), ".log"}
-    fileName := strings.Join(strv, "")
+    logFile := fmt.Sprintf("gfb-%d-%d-%d-%d.log", expireTime.year, expireTime.month, expireTime.day, expireTime.min)
 
-    fp, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+    fp, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
     if err != nil {
         panic(err)
     }

@@ -10,7 +10,8 @@
 #define GFB_RESPONSE_SUCCESS 0
 #define GFB_RESPONSE_FAILURE 1
 
-int gfb_get_os_info  (char **release, char **code_name);
-int gfb_post_request (char *server_url, const char *title, char *category, char *release, char *code_name, char *description);
+int   gfb_get_os_info           (char **release, char **code_name);
+int   gfb_post_request          (char *server_url, const char *title, char *category, char *release, char *code_name, char *description);
+char *gfb_status_code_to_string (int status_code);
 
 #endif

@@ -62,10 +62,8 @@ gfb_submit_button_clicked (GtkButton *widget,
 
   gfb_get_os_info (&release, &code_name);
 
-  g_print ("title: %s\ncategory: %s\ndescription: %s\nrelease: %s\ncode name: %s\n",
-           title, category, description, release, code_name);
-
-  // TODO: Submit
+  //g_print ("title: %s\ncategory: %s\ndescription: %s\nrelease: %s\ncode name: %s\n",
+           //title, category, description, release, code_name);
 
   if (strlen (title))
   {
@@ -74,7 +72,7 @@ gfb_submit_button_clicked (GtkButton *widget,
     strftime (time_str, sizeof (time_str), "%F %T", time_ptr);
     history = fopen (priv->gfb_history, "a");
     response = gfb_post_request (priv->server_url, title, category, release, code_name, description);
-    if (response == GFB_RESPONSE_SUCCESS)
+    if (response == 200)
     {
       server_response = "SUCCESS";
       response_msg = "\nThanks for taking the time to give us feedback.\n";
@@ -82,7 +80,7 @@ gfb_submit_button_clicked (GtkButton *widget,
     else
     {
       server_response = "FAILURE";
-      response_msg = "\nFAILURE.\n";
+      response_msg = gfb_status_code_to_string (response);
     }
     fprintf (history, "%s::%s::%s\n",
             time_str, title, server_response);
@@ -94,7 +92,7 @@ gfb_submit_button_clicked (GtkButton *widget,
         free (code_name);
   }
   else
-    response_msg = "\nPlease provide us more detailed information of your feedback.\n";
+    response_msg = "\nPlease provide us more detailed information of your feedback.\n[Need Feedback Title]\n";
 
   dialog = gtk_message_dialog_new (GTK_WINDOW (user_data),
                                    GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -106,7 +104,7 @@ gfb_submit_button_clicked (GtkButton *widget,
   gtk_window_set_title (GTK_WINDOW (dialog),
                         "Gooroom Feedback");
 
-  if (response == GFB_RESPONSE_SUCCESS)
+  if (response == 200)
     g_signal_connect_swapped (dialog, "response",
                               G_CALLBACK (gtk_widget_destroy),
                               GOOROOM_FEEDBACK_APP_WINDOW (user_data));
