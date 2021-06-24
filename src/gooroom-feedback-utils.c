@@ -63,6 +63,7 @@ gfb_post_request (char *server_url,
                        "codename=%s&"
                        "description=%s";
   long ret = GFB_RESPONSE_FAILURE;
+  char *content = NULL;
 
   curl = curl_easy_init ();
   curl_slist_append (list, "Content-Type: application/json");
@@ -77,6 +78,7 @@ gfb_post_request (char *server_url,
     curl_easy_setopt (curl, CURLOPT_POSTFIELDS, feedback);
     res = curl_easy_perform (curl);
     curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &ret);
+    curl_easy_getinfo (curl, CURLINFO_CONTENT_TYPE, &content); 
     curl_easy_cleanup (curl);
     curl_slist_free_all (list);
   }
