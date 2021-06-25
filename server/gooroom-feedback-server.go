@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	//"io/ioutil" // DELETE
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -26,7 +26,6 @@ var expireTime = struct {
 	year  int
 	month time.Month
 	day   int
-	min   int // DELETE
 }{}
 
 var logWriter = struct {
@@ -78,7 +77,6 @@ func checkExpireTime() {
 
 	if expireTime.year != year ||
 		expireTime.month != month ||
-		expireTime.min != time.Now().Minute() || // DELETE
 		expireTime.day != day {
 		gfbInit()
 	}
@@ -101,8 +99,9 @@ func issueHandler(w http.ResponseWriter, r *http.Request) {
 */
 
 func makeRequest(fb *Feedback) (*http.Request, error) {
-	const TOKEN string = "mf-ObB09RoYGsE_GReq3h-q7G3tJUDT0"
-	const BTS string = "http://www.feedback.gooroom.kr/api/rest/issues/"
+	//const TOKEN string = "mf-ObB09RoYGsE_GReq3h-q7G3tJUDT0"
+    const TOKEN string = "eJ7kQRWQS6-BtCLjOzSFJn37Aoeu6b-z"
+	const BTS string = "http://feedback.gooroom.kr/api/rest/issues/"
 
 	jfb, _ := json.Marshal(fmt.Sprintf(`{"summary": "%s", "description": "%s", "category": {"name": "%s"}, "project": {"name": "%s"}}`,
 		fb.Title, fb.Description, fb.Category, "Gooroom Feedback"))
@@ -143,13 +142,27 @@ func getFeedback(r *http.Request) (*Feedback, error) {
 	return &Feedback{Title: title, Category: category, Release: release, Codename: codename, Description: description}, nil
 }
 
+func statusHandler(w http.ResponseWriter, r *http.Request) {
+	logWriter.logger.Printf("[Gooroom-Feedback-Server] => Request Received. (Status, Sender: %s)\n", r.RemoteAddr)
+	if r.Method == "GET" {
+        w.WriteHeader(http.StatusOK)
+        w.Write([]byte(http.StatusText(http.StatusOK)))
+		logWriter.logger.Println("[Gooroom-Feedback-Server] => Running...")
+    } else {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write([]byte(http.StatusText(http.StatusMethodNotAllowed)))
+		logWriter.logger.Println("[Gooroom-Feedback-Server] => Not Allowed Method.")
+    }
+}
+
 func feedbackHandler(w http.ResponseWriter, r *http.Request) {
-	logWriter.logger.Println("[Gooroom-Feedback-Server] => Request Received.")
-	logWriter.logger.Printf("Sender: %s\n", r.RemoteAddr)
+	logWriter.logger.Printf("[Gooroom-Feedback-Server] => Request Received. (Feedback, Sender: %s)\n", r.RemoteAddr)
 
 	if r.Method == "POST" {
 		if validateFeedback(r) {
 			logWriter.logger.Println("[Gooroom-Feedback-Server] => Request Validated.")
+
+			logWriter.logger.Println("=========================== [FEEDBACK] ===========================")
 			logWriter.logger.Printf("Method: %s, URL: %s, Proto: %s\n", r.Method, r.URL, r.Proto)
 			for k, v := range r.Header {
 				logWriter.logger.Printf("%q = %q\n", k, v)
@@ -163,7 +176,6 @@ func feedbackHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			logWriter.logger.Println("=========================== [FEEDBACK] ===========================")
 			logWriter.logger.Printf("%+v\n", fb)
 			logWriter.logger.Println("==================================================================")
 
@@ -181,8 +193,10 @@ func feedbackHandler(w http.ResponseWriter, r *http.Request) {
 			for k, v := range req.Header {
 				logWriter.logger.Printf("%q = %q\n", k, v)
 			}
-			jfb, _ := json.Marshal(fb)
-			logWriter.logger.Printf("%s\n", string(jfb))
+			respBody, _ := ioutil.ReadAll(req.Body)
+			logWriter.logger.Println(string(respBody))
+			//jfb, _ := json.Marshal(fb)
+			//logWriter.logger.Printf("%s\n", string(jfb))
 			logWriter.logger.Println("===============================================================")
 
 			client := &http.Client{}
@@ -211,7 +225,6 @@ func feedbackHandler(w http.ResponseWriter, r *http.Request) {
 
 func setExpireTimeNow() {
 	expireTime.year, expireTime.month, expireTime.day = time.Now().Date()
-	expireTime.min = time.Now().Minute() // DELETE
 }
 
 func setLogWriterNow() {
@@ -221,7 +234,7 @@ func setLogWriterNow() {
 		}
 	}
 
-	logFile := fmt.Sprintf("gfb-%d-%d-%d-%d.log", expireTime.year, expireTime.month, expireTime.day, expireTime.min)
+	logFile := fmt.Sprintf("gfb-%d-%02d-%02d.log", expireTime.year, expireTime.month, expireTime.day)
 
 	fp, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
@@ -236,6 +249,7 @@ func gfbInit() {
 	setExpireTimeNow()
 	resetCounter()
 	setLogWriterNow()
+	logWriter.logger.Println("[Gooroom-Feedback-Server] => Initialized.")
 }
 
 func main() {
@@ -248,6 +262,7 @@ func main() {
 		Handler:      nil,
 	}
 	http.HandleFunc("/gooroom/feedback/new", feedbackHandler)
+    http.HandleFunc("/status", statusHandler)
 	//http.HandleFunc("/api/rest/issues/", issueHandler) // DELETE
 
 	idleConnsClosed := make(chan struct{})
@@ -258,13 +273,14 @@ func main() {
 		<-done
 
 		if err := srv.Shutdown(context.Background()); err != nil {
-			logWriter.logger.Printf("HTTP Server Shutdown: %v", err)
+			logWriter.logger.Printf("[Gooroom-Feedback-Server] => %v", err)
 		}
 		close(idleConnsClosed)
 	}()
 
+	logWriter.logger.Println("[Gooroom-Feedback-Server] => Serving...")
 	if err := srv.ListenAndServe(); err != nil {
-		logWriter.logger.Fatalf("HTTP Server ListenAndServe: %v", err)
+		logWriter.logger.Fatalf("[Gooroom-Feedback-Server] => %v", err)
 	}
 
 	<-idleConnsClosed
