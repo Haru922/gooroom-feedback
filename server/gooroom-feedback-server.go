@@ -3,10 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -48,7 +45,7 @@ type Issue struct {
 	Project     string `json:"project"`
 }
 
-func resetCounter() {
+func setCounterNow() {
 	counter.Lock()
 	defer counter.Unlock()
 	counter.visited = make(map[string]int)
@@ -82,33 +79,17 @@ func checkExpireTime() {
 	}
 }
 
-/* DELETE
-func issueHandler(w http.ResponseWriter, r *http.Request) {
-		logger.Printf("RemoteAddr: %s\n", r.RemoteAddr)
-		if r.Method == "POST" {
-		    logger.Println("===ISSUE===")
-			logger.Printf("%s %s %s\n", r.Method, r.URL, r.Proto)
-			for k, v := range r.Header {
-				logger.Printf("%q = %q\n", k, v)
-			}
-			respBody, _ := ioutil.ReadAll(r.Body)
-			logger.Println(string(respBody))
-		    logger.Println("===========")
-		}
-}
-*/
-
 func makeRequest(fb *Feedback) (*http.Request, error) {
-	//const TOKEN string = "mf-ObB09RoYGsE_GReq3h-q7G3tJUDT0"
-    const TOKEN string = "eJ7kQRWQS6-BtCLjOzSFJn37Aoeu6b-z"
-	const BTS string = "http://feedback.gooroom.kr/api/rest/issues/"
+	//const TOKEN string = "lREDdOh5jvzQcRclffDG7njhCLfoMGJw" // Administrator
+    const TOKEN string = "u-cSfjFwHnCTeVcIZclp2nuQS3fwL8-7" // Reporter
+	const BTS string = "http://feedback.gooroom.kr/mantis/api/rest/issues/"
 
-	jfb, _ := json.Marshal(fmt.Sprintf(`{"summary": "%s", "description": "%s", "category": {"name": "%s"}, "project": {"name": "%s"}}`,
-		fb.Title, fb.Description, fb.Category, "Gooroom Feedback"))
-	req, err := http.NewRequest("POST", BTS, bytes.NewBuffer(jfb))
-    if err != nil {
-        return nil, err
-    }
+	issue := fmt.Sprintf(`{"summary": "%s", "description": "%s", "category": {"name": "%s"}, "project": {"name": "%s"}}`,
+		fb.Title, fb.Description, fb.Category, "Gooroom Feedback")
+	req, err := http.NewRequest("POST", BTS, bytes.NewBuffer(bytes.NewBufferString(issue).Bytes()))
+	if err != nil {
+		return nil, err
+	}
 
 	defer req.Body.Close()
 	req.Header.Add("Authorization", TOKEN)
@@ -121,7 +102,7 @@ func getFeedback(r *http.Request) (*Feedback, error) {
 	var title, category, release, codename, description string
 
 	if err := r.ParseForm(); err != nil {
-		return nil, errors.New("Invalid Feedback.")
+		return nil, err
 	}
 
 	for k, v := range r.Form {
@@ -144,26 +125,35 @@ func getFeedback(r *http.Request) (*Feedback, error) {
 
 func statusHandler(w http.ResponseWriter, r *http.Request) {
 	logWriter.logger.Printf("[Gooroom-Feedback-Server] => Request Received. (Status, Sender: %s)\n", r.RemoteAddr)
+    fmt.Printf("[Gooroom-Feedback-Server] => Request Received. (Status, Sender: %s)\n", r.RemoteAddr) // DELETE
+
 	if r.Method == "GET" {
-        w.WriteHeader(http.StatusOK)
-        w.Write([]byte(http.StatusText(http.StatusOK)))
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(http.StatusText(http.StatusOK)))
+
 		logWriter.logger.Println("[Gooroom-Feedback-Server] => Running...")
-    } else {
+		fmt.Println("[Gooroom-Feedback-Server] => Running...") // DELETE
+	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte(http.StatusText(http.StatusMethodNotAllowed)))
+
 		logWriter.logger.Println("[Gooroom-Feedback-Server] => Not Allowed Method.")
-    }
+		fmt.Println("[Gooroom-Feedback-Server] => Not Allowed Method.") // DELETE
+	}
 }
 
 func feedbackHandler(w http.ResponseWriter, r *http.Request) {
 	logWriter.logger.Printf("[Gooroom-Feedback-Server] => Request Received. (Feedback, Sender: %s)\n", r.RemoteAddr)
+	fmt.Printf("[Gooroom-Feedback-Server] => Request Received. (Feedback, Sender: %s)\n", r.RemoteAddr) // DELETE
 
 	if r.Method == "POST" {
 		if validateFeedback(r) {
 			logWriter.logger.Println("[Gooroom-Feedback-Server] => Request Validated.")
-
 			logWriter.logger.Println("=========================== [FEEDBACK] ===========================")
 			logWriter.logger.Printf("Method: %s, URL: %s, Proto: %s\n", r.Method, r.URL, r.Proto)
+			fmt.Println("[Gooroom-Feedback-Server] => Request Validated.") // DELETE
+			fmt.Println("=========================== [FEEDBACK] ===========================") // DELETE
+			fmt.Printf("Method: %s, URL: %s, Proto: %s\n", r.Method, r.URL, r.Proto) // DELETE
 			for k, v := range r.Header {
 				logWriter.logger.Printf("%q = %q\n", k, v)
 			}
@@ -171,55 +161,69 @@ func feedbackHandler(w http.ResponseWriter, r *http.Request) {
 			fb, err := getFeedback(r)
 			if err != nil {
 				logWriter.logger.Printf("[Gooroom-Feedback-Server] => %s\n", err)
+				fmt.Printf("[Gooroom-Feedback-Server] => %s\n", err) // DELETE
+
 				w.WriteHeader(http.StatusBadRequest)
 				w.Write([]byte(http.StatusText(http.StatusBadRequest)))
-				return
+
+				return // TODO
 			}
 
 			logWriter.logger.Printf("%+v\n", fb)
 			logWriter.logger.Println("==================================================================")
+			fmt.Printf("%+v\n", fb) // DELETE
+			fmt.Println("==================================================================") // DELETE
 
 			req, err := makeRequest(fb)
-            if err != nil {
-                logWriter.logger.Printf("[Gooroom-Feedback-Server] => %s\n", err)
-                w.WriteHeader(http.StatusInternalServerError)
-                w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
-                return
-            }
+			if err != nil {
+				logWriter.logger.Printf("[Gooroom-Feedback-Server] => %s\n", err)
+				fmt.Printf("[Gooroom-Feedback-Server] => %s\n", err) // DELETE
+
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
+
+				return // TODO
+			}
 
 			logWriter.logger.Println("[Gooroom-Feedback-Server] => Issue Created")
-			logWriter.logger.Println("=========================== [ISSUE] ===========================")
-			logWriter.logger.Printf("Method: %s, URL: %s, Proto: %s\n", req.Method, req.URL, req.Proto)
-			for k, v := range req.Header {
-				logWriter.logger.Printf("%q = %q\n", k, v)
-			}
-			respBody, _ := ioutil.ReadAll(req.Body)
-			logWriter.logger.Println(string(respBody))
-			//jfb, _ := json.Marshal(fb)
-			//logWriter.logger.Printf("%s\n", string(jfb))
-			logWriter.logger.Println("===============================================================")
+			fmt.Println("[Gooroom-Feedback-Server] => Issue Created") // DELETE
+			fmt.Printf("%+v\n", req) // DELETE
 
 			client := &http.Client{}
-			_, err = client.Do(req)
+			resp, err := client.Do(req)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
+
 				logWriter.logger.Println("[Gooroom-Feedback-Server] => Internal Server Error.")
 				logWriter.logger.Printf("ERROR: %s\n", err)
-			} else {
-				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(http.StatusText(http.StatusOK)))
-				logWriter.logger.Println("[Gooroom-Feedback-Server] => Issue Requested.")
+				fmt.Println("[Gooroom-Feedback-Server] => Internal Server Error.") // DELETE
+				fmt.Printf("ERROR: %s\n", err) // DELETE
 			}
+			defer resp.Body.Close()
+
+			logWriter.logger.Println("[Gooroom-Feedback-Server] => Issue Requested.")
+			fmt.Println("[Gooroom-Feedback-Server] => Issue Requested.") // DELETE
+
+            logWriter.logger.Println(resp)
+            fmt.Println(resp.StatusCode) // DELETE
+            fmt.Println(resp) // DELETE
+
+            w.WriteHeader(resp.StatusCode)
+            w.Write([]byte(http.StatusText(resp.StatusCode)))
 		} else {
 			w.WriteHeader(http.StatusNotAcceptable)
 			w.Write([]byte(http.StatusText(http.StatusNotAcceptable)))
+
 			logWriter.logger.Println("[Gooroom-Feedback-Server] => Request Invalidated.")
+			fmt.Println("[Gooroom-Feedback-Server] => Request Invalidated.") // DELETE
 		}
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte(http.StatusText(http.StatusMethodNotAllowed)))
+
 		logWriter.logger.Println("[Gooroom-Feedback-Server] => Not Allowed Method.")
+		fmt.Println("[Gooroom-Feedback-Server] => Not Allowed Method.") // DELETE
 	}
 }
 
@@ -243,13 +247,21 @@ func setLogWriterNow() {
 
 	logWriter.fp = fp
 	logWriter.logger = log.New(logWriter.fp, "", log.LstdFlags|log.Lshortfile)
+	logWriter.logger.Printf("[Gooroom-Feedback-Server] => Date: %d-%02d-%02d\n",
+		expireTime.year, expireTime.month, expireTime.day)
+	fmt.Printf("[Gooroom-Feedback-Server] => Date: %d-%02d-%02d\n", // DELETE
+		expireTime.year, expireTime.month, expireTime.day) // DELETE
 }
 
 func gfbInit() {
 	setExpireTimeNow()
-	resetCounter()
+
+	setCounterNow()
+
 	setLogWriterNow()
+
 	logWriter.logger.Println("[Gooroom-Feedback-Server] => Initialized.")
+	fmt.Println("[Gooroom-Feedback-Server] => Initialized.") //DELETE
 }
 
 func main() {
@@ -261,24 +273,29 @@ func main() {
 		ReadTimeout:  1 * time.Second,
 		Handler:      nil,
 	}
+
 	http.HandleFunc("/gooroom/feedback/new", feedbackHandler)
-    http.HandleFunc("/status", statusHandler)
-	//http.HandleFunc("/api/rest/issues/", issueHandler) // DELETE
+	http.HandleFunc("/status", statusHandler)
 
 	idleConnsClosed := make(chan struct{})
 
 	go func() {
 		done := make(chan os.Signal, 1)
 		signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
 		<-done
 
 		if err := srv.Shutdown(context.Background()); err != nil {
 			logWriter.logger.Printf("[Gooroom-Feedback-Server] => %v", err)
+			fmt.Printf("[Gooroom-Feedback-Server] => %v", err) // DELETE
 		}
+
 		close(idleConnsClosed)
 	}()
 
 	logWriter.logger.Println("[Gooroom-Feedback-Server] => Serving...")
+	fmt.Println("[Gooroom-Feedback-Server] => Serving...") // DELETE
+
 	if err := srv.ListenAndServe(); err != nil {
 		logWriter.logger.Fatalf("[Gooroom-Feedback-Server] => %v", err)
 	}

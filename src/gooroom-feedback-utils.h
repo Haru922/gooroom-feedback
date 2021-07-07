@@ -6,9 +6,10 @@
 #include <glib-object.h>
 #include <curl/curl.h>
 
+#define GFB_RESPONSE_SUCCESS 201
+#define GFB_RESPONSE_FAILURE   0
+
 #define GOOROOM_OS_INFO "/etc/gooroom/info"
-#define GFB_RESPONSE_SUCCESS 0
-#define GFB_RESPONSE_FAILURE 1
 
 int   gfb_get_os_info           (char **release, char **code_name);
 int   gfb_post_request          (char *server_url, const char *title, char *category, char *release, char *code_name, char *description);

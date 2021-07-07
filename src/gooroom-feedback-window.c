@@ -62,9 +62,6 @@ gfb_submit_button_clicked (GtkButton *widget,
 
   gfb_get_os_info (&release, &code_name);
 
-  //g_print ("title: %s\ncategory: %s\ndescription: %s\nrelease: %s\ncode name: %s\n",
-           //title, category, description, release, code_name);
-
   if (strlen (title))
   {
     temp = time (NULL);
@@ -72,7 +69,7 @@ gfb_submit_button_clicked (GtkButton *widget,
     strftime (time_str, sizeof (time_str), "%F %T", time_ptr);
     history = fopen (priv->gfb_history, "a");
     response = gfb_post_request (priv->server_url, title, category, release, code_name, description);
-    if (response == 200)
+    if (response == GFB_RESPONSE_SUCCESS)
     {
       server_response = "SUCCESS";
       response_msg = "\nThanks for taking the time to give us feedback.\n";
@@ -104,7 +101,7 @@ gfb_submit_button_clicked (GtkButton *widget,
   gtk_window_set_title (GTK_WINDOW (dialog),
                         "Gooroom Feedback");
 
-  if (response == 200)
+  if (response == GFB_RESPONSE_SUCCESS)
     g_signal_connect_swapped (dialog, "response",
                               G_CALLBACK (gtk_widget_destroy),
                               GOOROOM_FEEDBACK_APP_WINDOW (user_data));
