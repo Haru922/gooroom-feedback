@@ -11,6 +11,7 @@ gooroom_feedback_history_view_init (GtkWidget *gfb_history_window,
   int column_id;
 
   gfb_history_view = gtk_tree_view_new ();
+  /*
   for (column_id = 0; column_id < GFB_HISTORY_COLUMNS; column_id++)
   {
     renderer = gtk_cell_renderer_text_new ();
@@ -23,9 +24,24 @@ gooroom_feedback_history_view_init (GtkWidget *gfb_history_window,
       gtk_tree_view_column_set_fixed_width (column, 200);
     gtk_tree_view_append_column (GTK_TREE_VIEW (gfb_history_view), column);
   }
+  */
+  column = gtk_tree_view_column_new_with_attributes (_("DATE"),
+                                                     gtk_cell_renderer_text_new (),
+                                                     "text",
+                                                     GFB_HISTORY_DATE,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (gfb_history_view), column);
+
+  column = gtk_tree_view_column_new_with_attributes (_("TITLE"),
+                                                     gtk_cell_renderer_text_new (),
+                                                     "text",
+                                                     GFB_HISTORY_TITLE,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (gfb_history_view), column);
+
   gfb_history_store = gtk_list_store_new (GFB_HISTORY_COLUMNS,
                                           G_TYPE_STRING,
-                                          G_TYPE_STRING,
+                                          //G_TYPE_STRING,
                                           G_TYPE_STRING);
   gtk_tree_view_set_model (GTK_TREE_VIEW (gfb_history_view), GTK_TREE_MODEL (gfb_history_store));
   gtk_container_add (GTK_CONTAINER (gfb_history_window), GTK_WIDGET (gfb_history_view));
@@ -56,7 +72,7 @@ gooroom_feedback_history_view_get_items (GtkWidget *gfb_history_view,
     while (fgets (history, BUFSIZ, fp))
     {
         segments = g_strsplit (history, "::", 0);
-        segments[GFB_HISTORY_RESULT][strlen(segments[GFB_HISTORY_RESULT])-1] = '\0';
+        //segments[GFB_HISTORY_RESULT][strlen(segments[GFB_HISTORY_RESULT])-1] = '\0';
         gtk_list_store_append (gfb_history_store, &iter);
         gtk_list_store_set (gfb_history_store,
                             &iter,
@@ -64,8 +80,8 @@ gooroom_feedback_history_view_get_items (GtkWidget *gfb_history_view,
                             segments[GFB_HISTORY_DATE],
                             GFB_HISTORY_TITLE,
                             segments[GFB_HISTORY_TITLE],
-                            GFB_HISTORY_RESULT,
-                            segments[GFB_HISTORY_RESULT],
+                            //GFB_HISTORY_RESULT,
+                            //segments[GFB_HISTORY_RESULT],
                             -1);
         g_strfreev (segments);
         segments = NULL;

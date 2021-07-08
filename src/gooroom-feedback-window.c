@@ -12,9 +12,11 @@ struct _GooroomFeedbackAppWindowPrivate
   GtkWidget *gfb_category_button_problem;
   GtkWidget *gfb_category_button_suggestion;
   GtkWidget *gfb_description_buffer;
+  GtkWidget *gfb_button_box;
   GtkWidget *gfb_button_submit;
   GtkWidget *gfb_button_cancel;
   GtkWidget *gfb_history_window;
+  GtkWidget *spinner;
   gchar *server_url;
   gchar *gfb_history;
 };
@@ -26,13 +28,13 @@ gfb_submit_button_clicked (GtkButton *widget,
                            gpointer   user_data)
 {
   GooroomFeedbackAppWindowPrivate *priv = NULL;
-  gboolean response = TRUE;
+  long response = GFB_RESPONSE_FAILURE;
   const gchar *title = NULL;
   gchar *description = NULL;
   gchar *category = NULL;
   gchar *release = NULL;
   gchar *code_name = NULL;
-  gchar *response_msg = NULL;
+  const gchar *response_msg = NULL;
   gchar *server_response = NULL;
   GtkTextIter start_iter;
   GtkTextIter end_iter;
@@ -62,34 +64,37 @@ gfb_submit_button_clicked (GtkButton *widget,
 
   gfb_get_os_info (&release, &code_name);
 
-  if (strlen (title))
+  if (strlen (title) && strlen (description))
   {
     temp = time (NULL);
     time_ptr = localtime (&temp);
     strftime (time_str, sizeof (time_str), "%F %T", time_ptr);
-    history = fopen (priv->gfb_history, "a");
+    gtk_spinner_start (GTK_SPINNER (priv->spinner));
+    gtk_widget_show (priv->spinner);
     response = gfb_post_request (priv->server_url, title, category, release, code_name, description);
     if (response == GFB_RESPONSE_SUCCESS)
     {
-      server_response = "SUCCESS";
-      response_msg = "\nThanks for taking the time to give us feedback.\n";
+      server_response = _("SUCCESS");
+      response_msg = _("\nThanks for taking the time to give us feedback.\n");
+      history = fopen (priv->gfb_history, "a");
+      fprintf (history, "%s::%s::%s\n",
+               time_str, title, server_response);
+      fclose (history);
     }
     else
     {
-      server_response = "FAILURE";
-      response_msg = gfb_status_code_to_string (response);
+      server_response = _("FAILURE");
+      response_msg = _("\nInternal Server Error.\n");
     }
-    fprintf (history, "%s::%s::%s\n",
-            time_str, title, server_response);
-    fclose (history);
     g_free (description);
     if (release)
         free (release);
     if (code_name)
         free (code_name);
+    gtk_spinner_stop (GTK_SPINNER (priv->spinner));
   }
   else
-    response_msg = "\nPlease provide us more detailed information of your feedback.\n[Need Feedback Title]\n";
+    response_msg = _("\nPlease provide us more detailed information of your feedback.\n");
 
   dialog = gtk_message_dialog_new (GTK_WINDOW (user_data),
                                    GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -99,7 +104,7 @@ gfb_submit_button_clicked (GtkButton *widget,
                                    NULL);
 
   gtk_window_set_title (GTK_WINDOW (dialog),
-                        "Gooroom Feedback");
+                        _("Gooroom Feedback"));
 
   if (response == GFB_RESPONSE_SUCCESS)
     g_signal_connect_swapped (dialog, "response",
@@ -122,6 +127,10 @@ gooroom_feedback_app_window_init (GooroomFeedbackAppWindow *win)
 
   priv = gooroom_feedback_app_window_get_instance_private (win);
   gtk_widget_init_template (GTK_WIDGET (win));
+
+  priv->spinner = gtk_spinner_new ();
+  gtk_widget_show (priv->spinner);
+  gtk_box_pack_end (priv->gfb_button_box, priv->spinner, FALSE, FALSE, 0);
 
   if (g_key_file_load_from_file (key_file, GFB_CONF, G_KEY_FILE_NONE, NULL))
   {
@@ -173,6 +182,9 @@ gooroom_feedback_app_window_class_init (GooroomFeedbackAppWindowClass *class)
   gtk_widget_class_bind_template_child_private (GTK_WIDGET_CLASS (class),
                                                 GooroomFeedbackAppWindow,
                                                 gfb_description_buffer);
+  gtk_widget_class_bind_template_child_private (GTK_WIDGET_CLASS (class),
+                                                GooroomFeedbackAppWindow,
+                                                gfb_button_box);
   gtk_widget_class_bind_template_child_private (GTK_WIDGET_CLASS (class),
                                                 GooroomFeedbackAppWindow,
                                                 gfb_button_submit);

@@ -1,13 +1,14 @@
 #ifndef _GOOROOM_FEEDBACK_HISTORY_VIEW_H_
 #define _GOOROOM_FEEDBACK_HISTORY_VIEW_H_
 
+#include <glib/gi18n.h>
 #include <gtk/gtk.h>
 #include <pwd.h>
 
 enum _gfb_history_column {
   GFB_HISTORY_DATE,
   GFB_HISTORY_TITLE,
-  GFB_HISTORY_RESULT,
+  //GFB_HISTORY_RESULT,
   //GFB_HISTORY_TYPE,
   //GFB_HISTORY_OS,
   GFB_HISTORY_COLUMNS
@@ -15,8 +16,8 @@ enum _gfb_history_column {
 
 static char *column_names[] = {
   "DATE",
-  "TITLE",
-  "RESULT"
+  "TITLE"
+  //"RESULT",
   //"TYPE",
   //"OS"
 };

@@ -244,9 +244,6 @@ with Gooroom OS.</property>
             <property name="can_focus">False</property>
             <property name="border_width">5</property>
             <child>
-              <placeholder/>
-            </child>
-            <child>
               <object class="GtkButton" id="gfb_button_cancel">
                 <property name="label" translatable="yes">Cancel</property>
                 <property name="width_request">75</property>

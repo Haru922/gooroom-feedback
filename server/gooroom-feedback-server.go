@@ -38,13 +38,6 @@ type Feedback struct {
 	Description string `json:"description"`
 }
 
-type Issue struct {
-	Summary     string `json:"summary"`
-	Description string `json:"description"`
-	Category    string `json:"category"`
-	Project     string `json:"project"`
-}
-
 func setCounterNow() {
 	counter.Lock()
 	defer counter.Unlock()
@@ -166,7 +159,7 @@ func feedbackHandler(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 				w.Write([]byte(http.StatusText(http.StatusBadRequest)))
 
-				return // TODO
+				return
 			}
 
 			logWriter.logger.Printf("%+v\n", fb)
@@ -182,28 +175,30 @@ func feedbackHandler(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
 
-				return // TODO
+				return
 			}
 
 			logWriter.logger.Println("[Gooroom-Feedback-Server] => Issue Created")
 			fmt.Println("[Gooroom-Feedback-Server] => Issue Created") // DELETE
 			fmt.Printf("%+v\n", req) // DELETE
 
-			client := &http.Client{}
+			client := &http.Client{Timeout: 3 * time.Second}
 			resp, err := client.Do(req)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
+                w.Write([]byte(err.Error()))
 
 				logWriter.logger.Println("[Gooroom-Feedback-Server] => Internal Server Error.")
 				logWriter.logger.Printf("ERROR: %s\n", err)
 				fmt.Println("[Gooroom-Feedback-Server] => Internal Server Error.") // DELETE
 				fmt.Printf("ERROR: %s\n", err) // DELETE
-			}
-			defer resp.Body.Close()
 
-			logWriter.logger.Println("[Gooroom-Feedback-Server] => Issue Requested.")
-			fmt.Println("[Gooroom-Feedback-Server] => Issue Requested.") // DELETE
+                return
+			}
+            defer resp.Body.Close()
+
+            logWriter.logger.Println("[Gooroom-Feedback-Server] => Issue Requested.")
+            fmt.Println("[Gooroom-Feedback-Server] => Issue Requested.") // DELETE
 
             logWriter.logger.Println(resp)
             fmt.Println(resp.StatusCode) // DELETE
@@ -269,8 +264,8 @@ func main() {
 
 	srv := &http.Server{
 		Addr:         ":8000",
-		WriteTimeout: 2 * time.Second,
-		ReadTimeout:  1 * time.Second,
+		WriteTimeout: 3 * time.Second,
+		ReadTimeout:  3 * time.Second,
 		Handler:      nil,
 	}
 

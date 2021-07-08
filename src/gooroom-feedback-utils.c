@@ -74,11 +74,14 @@ gfb_post_request (char *server_url,
     curl_easy_setopt (curl, CURLOPT_POST, 1L);
     snprintf (feedback, BUFSIZ, feedback_fmt,
               title, category, release, code_name, description);
-    //printf ("%s\n", feedback);
     curl_easy_setopt (curl, CURLOPT_POSTFIELDS, feedback);
     res = curl_easy_perform (curl);
-    curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &ret);
-    curl_easy_getinfo (curl, CURLINFO_CONTENT_TYPE, &content); 
+    if (res == CURLE_OK) {
+      curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &ret);
+      curl_easy_getinfo (curl, CURLINFO_CONTENT_TYPE, &content); 
+    } else
+      ret = res;
+
     curl_easy_cleanup (curl);
     curl_slist_free_all (list);
   }
@@ -86,9 +89,13 @@ gfb_post_request (char *server_url,
   return ret;
 }
 
-char *
+const char *
 gfb_status_code_to_string (int status_code)
 {
+  if (status_code < 100) {
+    return curl_easy_strerror (status_code);
+  }
+
   switch (status_code) {
     case 100: return "Continue";
     case 101: return "Switching Protocols";
