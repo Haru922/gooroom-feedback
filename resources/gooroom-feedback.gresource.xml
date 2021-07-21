@@ -2,5 +2,7 @@
 <gresources>
   <gresource prefix="/kr/gooroom/gooroom-feedback">
     <file preprocess="xml-stripblanks">gooroom-feedback.ui</file>
+    <file preprocess="xml-stripblanks">gooroom-feedback-dialog.ui</file>
+    <file>gooroom-feedback.css</file>
   </gresource>
 </gresources>

@@ -75,6 +75,12 @@ gfb_post_request (char *server_url,
     snprintf (feedback, BUFSIZ, feedback_fmt,
               title, category, release, code_name, description);
     curl_easy_setopt (curl, CURLOPT_POSTFIELDS, feedback);
+#ifdef SKIP_PEER_VERIFICATION
+    curl_easy_setopt (curl, CURLOPT_SSL_VERIFYPEER, 0L);
+#endif
+#ifdef SKIP_HOSTNAME_VERIFICATION
+    curl_easy_setopt (curl, CURLOPT_SSL_VERIFYHOST, 0L);
+#endif
     res = curl_easy_perform (curl);
     if (res == CURLE_OK) {
       curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &ret);
@@ -88,6 +94,52 @@ gfb_post_request (char *server_url,
 
   return ret;
 }
+
+/*
+int
+gfb_post_request (char *server_url,
+                  const char *title,
+                  char *category,
+                  char *release,
+                  char *code_name,
+                  char *description)
+{
+  CURL *curl;
+  CURLcode res;
+  struct curl_slist *list = NULL;
+  char feedback[BUFSIZ] = { 0, };
+  char *feedback_fmt = "title=%s&"
+                       "category=%s&"
+                       "release=%s&"
+                       "codename=%s&"
+                       "description=%s";
+  long ret = GFB_RESPONSE_FAILURE;
+  char *content = NULL;
+
+  curl = curl_easy_init ();
+  curl_slist_append (list, "Content-Type: application/json");
+
+  if (curl) {
+    curl_easy_setopt (curl, CURLOPT_URL, server_url);
+    curl_easy_setopt (curl, CURLOPT_HTTPHEADER, list);
+    curl_easy_setopt (curl, CURLOPT_POST, 1L);
+    snprintf (feedback, BUFSIZ, feedback_fmt,
+              title, category, release, code_name, description);
+    curl_easy_setopt (curl, CURLOPT_POSTFIELDS, feedback);
+    res = curl_easy_perform (curl);
+    if (res == CURLE_OK) {
+      curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &ret);
+      curl_easy_getinfo (curl, CURLINFO_CONTENT_TYPE, &content); 
+    } else
+      ret = res;
+
+    curl_easy_cleanup (curl);
+    curl_slist_free_all (list);
+  }
+
+  return ret;
+}
+*/
 
 const char *
 gfb_status_code_to_string (int status_code)

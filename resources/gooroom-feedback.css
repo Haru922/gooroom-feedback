@@ -1,0 +1,52 @@
+window {
+  background-color: #ffffff;
+}
+
+#gooroom-feedback-dialog {
+  background-color: #ffffff;
+}
+
+#gfb-title-entry {
+  margin: 10px 0 0;
+  padding: 8px 8px 8px 8px;
+  border: solid 1px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+#gfb-description-scrolled-window {
+  margin: 10px 0 0;
+  padding: 8px 8px 8px 8px;
+  border: solid 1px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+#gfb-button-new-dialog {
+  border-radius: 10px;
+  background-color: #3e6ddc;
+}
+
+#gfb-button-cancel {
+  border-radius: 10px;
+  border: solid 1px rgba(0, 0, 0, 0.2);
+}
+
+#gfb-button-submit {
+  border-radius: 10px;
+  background-color: #3e6ddc;
+}
+
+#gfb-button-new-dialog-label {
+  color: #ffffff;
+}
+
+#gfb-button-submit-label {
+  color: #ffffff;
+}
+
+label {
+  color: #000100;
+}
+
+#gfb-submit-label {
+  color: #ffffff;
+}
