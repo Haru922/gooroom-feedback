@@ -76,14 +76,18 @@ gfb_submit_button_clicked (GtkButton *widget,
       server_response = _("SUCCESS");
       response_msg = _("\nThanks for taking the time to give us feedback.\n");
       history = fopen (priv->gfb_history, "a");
-      fprintf (history, "%s::%s::%s\n",
-               time_str, title, server_response);
+      fprintf (history, "%s::%s::%s::%s::%s\n",
+               time_str, title, category, description, server_response);
       fclose (history);
     }
     else
     {
       server_response = _("FAILURE");
       response_msg = _("Internal Server Error.\n");
+      history = fopen (priv->gfb_history, "a");
+      fprintf (history, "%s::%s::%s::%s::%s\n",
+               time_str, title, category, description, server_response);
+      fclose (history);
     }
     g_free (description);
     if (release)

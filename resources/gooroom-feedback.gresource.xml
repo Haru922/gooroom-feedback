@@ -3,6 +3,9 @@
   <gresource prefix="/kr/gooroom/gooroom-feedback">
     <file preprocess="xml-stripblanks">gooroom-feedback.ui</file>
     <file preprocess="xml-stripblanks">gooroom-feedback-dialog.ui</file>
+    <file>gfb-init.svg</file>
+    <file>gfb-problem.svg</file>
+    <file>gfb-suggestion.svg</file>
     <file>gooroom-feedback.css</file>
   </gresource>
 </gresources>

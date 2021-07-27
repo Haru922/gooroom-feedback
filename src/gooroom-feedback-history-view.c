@@ -5,58 +5,27 @@ gooroom_feedback_history_view_init (GtkWidget *gfb_history_window,
                                     char      *gfb_history)
 {
   GtkWidget *gfb_history_view;
-  GtkCellRenderer *renderer;
-  GtkTreeViewColumn *column;
-  GtkListStore *gfb_history_store;
-  int column_id;
+  GtkWidget *gfb_history_box;
 
-  gfb_history_view = gtk_tree_view_new ();
-  /*
-  for (column_id = 0; column_id < GFB_HISTORY_COLUMNS; column_id++)
-  {
-    renderer = gtk_cell_renderer_text_new ();
-    column = gtk_tree_view_column_new_with_attributes (column_names[column_id],
-                                                       renderer,
-                                                       "text",
-                                                       column_id,
-                                                       NULL);
-    if (column_id == GFB_HISTORY_TITLE)
-      gtk_tree_view_column_set_fixed_width (column, 200);
-    gtk_tree_view_append_column (GTK_TREE_VIEW (gfb_history_view), column);
-  }
-  */
-  column = gtk_tree_view_column_new_with_attributes (_("DATE"),
-                                                     gtk_cell_renderer_text_new (),
-                                                     "text",
-                                                     GFB_HISTORY_DATE,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (gfb_history_view), column);
+  gfb_history_view = gtk_viewport_new (NULL, NULL);
+  gfb_history_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 1);
+  gtk_widget_show_all (gfb_history_box);
 
-  column = gtk_tree_view_column_new_with_attributes (_("TITLE"),
-                                                     gtk_cell_renderer_text_new (),
-                                                     "text",
-                                                     GFB_HISTORY_TITLE,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (gfb_history_view), column);
-
-  gfb_history_store = gtk_list_store_new (GFB_HISTORY_COLUMNS,
-                                          G_TYPE_STRING,
-                                          //G_TYPE_STRING,
-                                          G_TYPE_STRING);
-  gtk_tree_view_set_model (GTK_TREE_VIEW (gfb_history_view), GTK_TREE_MODEL (gfb_history_store));
-  gtk_container_add (GTK_CONTAINER (gfb_history_window), GTK_WIDGET (gfb_history_view));
-  g_object_unref (gfb_history_store);
-
-  gooroom_feedback_history_view_get_items (GTK_WIDGET (gfb_history_view), gfb_history);
+  gtk_container_add (GTK_CONTAINER (gfb_history_view), gfb_history_box);
+  gooroom_feedback_history_view_get_items (GTK_WIDGET (gfb_history_box), gfb_history);
+  gtk_container_add (GTK_CONTAINER (gfb_history_window), gfb_history_view);
   gtk_widget_show_all (GTK_WIDGET (gfb_history_view));
 }
 
 void
-gooroom_feedback_history_view_get_items (GtkWidget *gfb_history_view,
+gooroom_feedback_history_view_get_items (GtkWidget *gfb_history_box,
                                          char      *gfb_history)
 {
-  GtkListStore *gfb_history_store;
-  GtkTreeIter iter;
+  GtkWidget *gfb_history_button;
+  GtkWidget *gfb_history_info;
+  GtkWidget *gfb_history_details;
+  GtkWidget *gfb_history_image;
+  GtkWidget *gfb_history_init_box;
   FILE *fp;
   char history[BUFSIZ];
   struct passwd *pw;
@@ -66,26 +35,33 @@ gooroom_feedback_history_view_get_items (GtkWidget *gfb_history_view,
   uid = geteuid ();
   pw = getpwuid (uid);
 
-  gfb_history_store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gfb_history_view)));
   if (fp = fopen (gfb_history, "r"))
   {
     while (fgets (history, BUFSIZ, fp))
     {
         segments = g_strsplit (history, "::", 0);
         //segments[GFB_HISTORY_RESULT][strlen(segments[GFB_HISTORY_RESULT])-1] = '\0';
-        gtk_list_store_append (gfb_history_store, &iter);
-        gtk_list_store_set (gfb_history_store,
-                            &iter,
-                            GFB_HISTORY_DATE,
-                            segments[GFB_HISTORY_DATE],
-                            GFB_HISTORY_TITLE,
-                            segments[GFB_HISTORY_TITLE],
-                            //GFB_HISTORY_RESULT,
-                            //segments[GFB_HISTORY_RESULT],
-                            -1);
+        gfb_history_button = gtk_button_new ();
+        //history_button = gtk_button_new_with_label (segments[GFB_HISTORY_TITLE]);
+        gfb_history_info = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 10);
+        if (!strcmp (segments[GFB_HISTORY_TYPE], "problem"))
+          gfb_history_image = gtk_image_new_from_resource ("/kr/gooroom/gooroom-feedback/gfb-problem.svg");
+        else
+          gfb_history_image = gtk_image_new_from_resource ("/kr/gooroom/gooroom-feedback/gfb-suggestion.svg");
+        gtk_box_pack_start (GTK_BOX (gfb_history_info), gfb_history_image, FALSE, FALSE, 5);
+        gfb_history_details = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+        gtk_box_pack_start (GTK_BOX (gfb_history_details), gtk_label_new (segments[GFB_HISTORY_TITLE]), FALSE, FALSE, 5);
+        gtk_box_pack_start (GTK_BOX (gfb_history_details), gtk_label_new (segments[GFB_HISTORY_DATE]), FALSE, FALSE, 5);
+        gtk_box_pack_start (GTK_BOX (gfb_history_info), gfb_history_details, FALSE, FALSE, 5);
+        gtk_container_add (GTK_CONTAINER (gfb_history_button), gfb_history_info);
+        gtk_box_pack_end (GTK_CONTAINER (gfb_history_box), gfb_history_button, FALSE, FALSE, 0);
         g_strfreev (segments);
         segments = NULL;
     }
     fclose (fp);
   }
+  gfb_history_init_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 10);
+  gtk_box_pack_start (GTK_BOX (gfb_history_init_box), gtk_image_new_from_resource ("/kr/gooroom/gooroom-feedback/gfb-init.svg"), FALSE, FALSE, 5);
+  gtk_box_pack_start (GTK_BOX (gfb_history_init_box), gtk_label_new ("Click New Button"), FALSE, FALSE, 5);
+  gtk_box_pack_start (GTK_CONTAINER (gfb_history_box), gfb_history_init_box, FALSE, FALSE, 0);
 }

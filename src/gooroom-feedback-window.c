@@ -21,6 +21,7 @@ gfb_dialog_new_button_clicked (GtkButton *widget,
                                gpointer   user_data)
 {
   GooroomFeedbackDialog *dialog = gooroom_feedback_dialog_new ();
+  //gtk_window_set_modal (GTK_WINDOW (dialog), FALSE);
   gtk_dialog_run (GTK_DIALOG (dialog));
 }
 
