@@ -48,7 +48,8 @@ gooroom_feedback_app_window_init (GooroomFeedbackAppWindow *win)
                                              GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
   gtk_widget_set_name (gfb_button_new_dialog_label, "gfb-button-new-dialog-label");
-  gtk_container_add (GTK_CONTAINER (priv->gfb_button_new_dialog), gfb_button_new_dialog_label);
+  gtk_container_add (GTK_CONTAINER (priv->gfb_button_new_dialog),
+                     gfb_button_new_dialog_label);
   gtk_widget_show (gfb_button_new_dialog_label);
   gooroom_feedback_history_view_init (priv->gfb_history_scrolled_window, priv->gfb_history);
 

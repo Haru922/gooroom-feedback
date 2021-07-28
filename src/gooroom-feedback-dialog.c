@@ -70,24 +70,35 @@ gfb_submit_button_clicked (GtkButton *widget,
     time_ptr = localtime (&temp);
     strftime (time_str, sizeof (time_str), "%F %T", time_ptr);
 
-    response = gfb_post_request (priv->server_url, title, category, release, code_name, description);
+    response = gfb_post_request (priv->server_url,
+                                 title,
+                                 category,
+                                 release,
+                                 code_name,
+                                 description);
     if (response == GFB_RESPONSE_SUCCESS)
     {
       server_response = _("SUCCESS");
       response_msg = _("\nThanks for taking the time to give us feedback.\n");
       history = fopen (priv->gfb_history, "a");
       fprintf (history, "%s::%s::%s::%s::%s\n",
-               time_str, title, category, description, server_response);
+               time_str,
+               title,
+               category,
+               description,
+               server_response);
       fclose (history);
     }
     else
     {
       server_response = _("FAILURE");
       response_msg = _("Internal Server Error.\n");
+      // DELETE START
       history = fopen (priv->gfb_history, "a");
       fprintf (history, "%s::%s::%s::%s::%s\n",
                time_str, title, category, description, server_response);
       fclose (history);
+      // END
     }
     g_free (description);
     if (release)
@@ -104,6 +115,8 @@ gfb_submit_button_clicked (GtkButton *widget,
                                    GTK_BUTTONS_CLOSE,
                                    response_msg,
                                    NULL);
+  gtk_widget_set_name (dialog,
+                       "gfb-need-info-dialog");
   gtk_window_set_title (GTK_WINDOW (dialog),
                         _("Gooroom Feedback"));
 
@@ -130,7 +143,10 @@ gooroom_feedback_dialog_init (GooroomFeedbackDialog *self)
   priv = gooroom_feedback_dialog_get_instance_private (self);
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  if (g_key_file_load_from_file (key_file, GOOROOM_FEEDBACK_CONF, G_KEY_FILE_NONE, NULL))
+  if (g_key_file_load_from_file (key_file,
+                                 GOOROOM_FEEDBACK_CONF,
+                                 G_KEY_FILE_NONE,
+                                 NULL))
   {
     priv->server_url = g_key_file_get_string (key_file, "SERVER", "address", NULL);
     priv->gfb_history = g_key_file_get_string (key_file, "SERVER", "history", NULL);
@@ -147,8 +163,10 @@ gooroom_feedback_dialog_init (GooroomFeedbackDialog *self)
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->gfb_category_button_problem), TRUE);
 
-  gtk_widget_set_name (gfb_button_submit_label, "gfb-button-submit-label");
-  gtk_container_add (GTK_CONTAINER (priv->gfb_button_submit), gfb_button_submit_label);
+  gtk_widget_set_name (gfb_button_submit_label,
+                       "gfb-button-submit-label");
+  gtk_container_add (GTK_CONTAINER (priv->gfb_button_submit),
+                     gfb_button_submit_label);
   gtk_widget_show (gfb_button_submit_label);
 
   g_signal_connect (priv->gfb_button_submit,

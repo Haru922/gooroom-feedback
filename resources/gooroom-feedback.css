@@ -43,10 +43,32 @@ window {
   color: #ffffff;
 }
 
+#gfb-need-info-dialog {
+  border-radius: 15px;
+  background-color: #ffffff;
+}
+
 label {
   color: #000100;
 }
 
 #gfb-submit-label {
   color: #ffffff;
+}
+
+#gfb-history-info-label {
+  color: #000100;
+  font-size: 24px;
+}
+
+#gfb-history-title-label {
+  color: #000100;
+  font-size: 13px;
+  margin: 0px 0 0 0px;
+}
+
+#gfb-history-date-label {
+  color: #696969;
+  font-size: 12px;
+  margin: 0px 0px 0px 0px;
 }

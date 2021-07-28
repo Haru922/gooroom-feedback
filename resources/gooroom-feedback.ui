@@ -21,7 +21,7 @@
             <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="valign">start</property>
-            <property name="label" translatable="yes">Feedback History</property>
+            <property name="label" translatable="yes">Gooroom Feedback List</property>
             <attributes>
               <attribute name="weight" value="bold"/>
             </attributes>
