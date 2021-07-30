@@ -5,6 +5,10 @@
 #include <gtk/gtk.h>
 #include <pwd.h>
 
+#define GFB_RESOURCE_INIT       "/kr/gooroom/gooroom-feedback/gfb-init.svg"
+#define GFB_RESOURCE_PROBLEM    "/kr/gooroom/gooroom-feedback/gfb-problem.svg"
+#define GFB_RESOURCE_SUGGESTION "/kr/gooroom/gooroom-feedback/gfb-suggestion.svg"
+
 enum _gfb_history_column {
   GFB_HISTORY_DATE,
   GFB_HISTORY_TITLE,

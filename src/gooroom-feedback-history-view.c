@@ -53,9 +53,9 @@ gooroom_feedback_history_view_get_items (GtkWidget *gfb_history_box,
                           g_strdup (segments[GFB_HISTORY_DESCRIPTION]));
         gfb_history_info = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 10);
         if (!strcmp (segments[GFB_HISTORY_TYPE], "problem"))
-          gfb_history_image = gtk_image_new_from_resource ("/kr/gooroom/gooroom-feedback/gfb-problem.svg");
+          gfb_history_image = gtk_image_new_from_resource (GFB_RESOURCE_PROBLEM);
         else
-          gfb_history_image = gtk_image_new_from_resource ("/kr/gooroom/gooroom-feedback/gfb-suggestion.svg");
+          gfb_history_image = gtk_image_new_from_resource (GFB_RESOURCE_SUGGESTION);
         gtk_box_pack_start (GTK_BOX (gfb_history_info),
                             gfb_history_image,
                             FALSE, FALSE, 5);
@@ -88,9 +88,9 @@ gooroom_feedback_history_view_get_items (GtkWidget *gfb_history_box,
   }
   gfb_history_init_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 10);
   gtk_box_pack_start (GTK_BOX (gfb_history_init_box),
-                      gtk_image_new_from_resource ("/kr/gooroom/gooroom-feedback/gfb-init.svg"),
+                      gtk_image_new_from_resource (GFB_RESOURCE_INIT),
                       FALSE, FALSE, 5);
-  gfb_history_label = gtk_label_new ("Feedback History");
+  gfb_history_label = gtk_label_new (_("Feedback History"));
   gtk_widget_set_name (gfb_history_label,
                        "gfb-history-info-label");
   gtk_box_pack_start (GTK_BOX (gfb_history_init_box),

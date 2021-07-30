@@ -75,6 +75,7 @@ gfb_post_request (char *server_url,
     snprintf (feedback, BUFSIZ, feedback_fmt,
               title, category, release, code_name, description);
     curl_easy_setopt (curl, CURLOPT_POSTFIELDS, feedback);
+    curl_easy_setopt (curl, CURLOPT_TIMEOUT, 2L);
 #ifdef SKIP_PEER_VERIFICATION
     curl_easy_setopt (curl, CURLOPT_SSL_VERIFYPEER, 0L);
 #endif
