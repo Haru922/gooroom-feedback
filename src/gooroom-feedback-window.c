@@ -11,6 +11,7 @@ struct _GooroomFeedbackAppWindowPrivate
   GtkWidget *gfb_button_new_dialog;
   GtkWidget *gfb_history_scrolled_window;
   GtkWidget *gfb_history_label;
+  GtkWidget *gfb_history_view;
   gchar *gfb_history;
 };
 
@@ -21,8 +22,22 @@ gfb_dialog_new_button_clicked (GtkButton *widget,
                                gpointer   user_data)
 {
   GooroomFeedbackDialog *dialog = gooroom_feedback_dialog_new ();
-  //gtk_window_set_modal (GTK_WINDOW (dialog), FALSE);
   gtk_dialog_run (GTK_DIALOG (dialog));
+}
+
+static gboolean
+gfb_update_history (GooroomFeedbackAppWindow *win)
+{
+  GooroomFeedbackAppWindowPrivate *priv = NULL;
+
+  priv = gooroom_feedback_app_window_get_instance_private (win);
+
+  gtk_widget_destroy (priv->gfb_history_view);
+  priv->gfb_history_view = gtk_viewport_new (NULL, NULL);
+  gooroom_feedback_history_view_init (priv->gfb_history_view, priv->gfb_history);
+  gtk_container_add (GTK_CONTAINER (priv->gfb_history_scrolled_window), priv->gfb_history_view);
+
+  return TRUE;
 }
 
 static void
@@ -51,12 +66,17 @@ gooroom_feedback_app_window_init (GooroomFeedbackAppWindow *win)
   gtk_container_add (GTK_CONTAINER (priv->gfb_button_new_dialog),
                      gfb_button_new_dialog_label);
   gtk_widget_show (gfb_button_new_dialog_label);
-  gooroom_feedback_history_view_init (priv->gfb_history_scrolled_window, priv->gfb_history);
+  priv->gfb_history_view = gtk_viewport_new (NULL, NULL);
+  gooroom_feedback_history_view_init (priv->gfb_history_view, priv->gfb_history);
+  gtk_container_add (GTK_CONTAINER (priv->gfb_history_scrolled_window), priv->gfb_history_view);
 
   g_signal_connect (priv->gfb_button_new_dialog,
                     "clicked",
                     G_CALLBACK (gfb_dialog_new_button_clicked),
                     win);
+  g_timeout_add (5000,
+                 G_SOURCE_FUNC (gfb_update_history),
+                 win);
 }
 
 static void

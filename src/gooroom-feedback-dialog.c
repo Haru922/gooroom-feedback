@@ -81,11 +81,12 @@ gfb_submit_button_clicked (GtkButton *widget,
       server_response = _("SUCCESS");
       response_msg = _("\nThanks for taking the time to give us feedback.\n");
       history = fopen (priv->gfb_history, "a");
-      fprintf (history, "%s::%s::%s::%s::%s\n",
+      fprintf (history, "%s::%s::%s::%s::%d::%s\n",
                time_str,
                title,
                category,
                description,
+               counter,
                server_response);
       fclose (history);
     }

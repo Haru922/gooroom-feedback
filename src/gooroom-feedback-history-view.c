@@ -1,21 +1,17 @@
 #include "gooroom-feedback-history-view.h"
 
 void
-gooroom_feedback_history_view_init (GtkWidget *gfb_history_window,
+gooroom_feedback_history_view_init (GtkWidget *gfb_history_view,
                                     char      *gfb_history)
 {
-  GtkWidget *gfb_history_view;
   GtkWidget *gfb_history_box;
 
-  gfb_history_view = gtk_viewport_new (NULL, NULL);
   gfb_history_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 1);
   gtk_widget_show_all (gfb_history_box);
 
   gtk_container_add (GTK_CONTAINER (gfb_history_view),
                      gfb_history_box);
   gooroom_feedback_history_view_get_items (GTK_WIDGET (gfb_history_box), gfb_history);
-  gtk_container_add (GTK_CONTAINER (gfb_history_window),
-                     gfb_history_view);
   gtk_widget_show_all (GTK_WIDGET (gfb_history_view));
 }
 
