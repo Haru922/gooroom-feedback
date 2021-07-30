@@ -1,6 +1,6 @@
 i18n = import('i18n')
 
 i18n.gettext(
-  meson.project_name(),
-  args: '--directory=' + meson.source_root()
+  'gooroom-feedback',
+  args: '--directory=' + '/usr/share/gooroom/locale/ko/LC_MESSAGES'
 )
