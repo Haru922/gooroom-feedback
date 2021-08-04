@@ -58,6 +58,8 @@ gooroom_feedback_history_view_get_items (GtkWidget *gfb_history_box,
         segments = g_strsplit (history, "::", 0);
         //segments[GFB_HISTORY_RESULT][strlen(segments[GFB_HISTORY_RESULT])-1] = '\0';
         gfb_history_button = gtk_button_new ();
+        gtk_widget_set_name (gfb_history_button,
+                             "gfb-history-button");
         g_signal_connect (gfb_history_button,
                           "clicked",
                           G_CALLBACK (gfb_history_button_clicked),

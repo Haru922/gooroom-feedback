@@ -56,6 +56,10 @@ label {
   color: #ffffff;
 }
 
+#gfb-history-button {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
 #gfb-history-info-label {
   color: #000100;
   font-size: 24px;
