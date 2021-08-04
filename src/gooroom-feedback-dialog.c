@@ -138,7 +138,7 @@ gooroom_feedback_dialog_init (GooroomFeedbackDialog *self)
   GtkEntryBuffer *buffer = NULL;
   GKeyFile *key_file = g_key_file_new ();
   GtkCssProvider *css_provider = gtk_css_provider_new ();
-  GtkWidget *gfb_button_submit_label = gtk_label_new ("Submit");
+  GtkWidget *gfb_button_submit_label = gtk_label_new (_("Submit"));
 
   priv = gooroom_feedback_dialog_get_instance_private (self);
   gtk_widget_init_template (GTK_WIDGET (self));

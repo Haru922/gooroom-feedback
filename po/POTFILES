@@ -1,0 +1,4 @@
+src/gooroom-feedback-dialog.c
+src/gooroom-feedback-history-view.c
+resources/gooroom-feedback.ui
+resources/gooroom-feedback-dialog.ui

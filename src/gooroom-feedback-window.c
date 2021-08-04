@@ -22,6 +22,8 @@ gfb_dialog_new_button_clicked (GtkButton *widget,
                                gpointer   user_data)
 {
   GooroomFeedbackDialog *dialog = gooroom_feedback_dialog_new ();
+  gtk_window_set_title (GTK_WINDOW (dialog),
+                        _("Gooroom Feedback"));
   gtk_dialog_run (GTK_DIALOG (dialog));
 }
 
@@ -46,7 +48,7 @@ gooroom_feedback_app_window_init (GooroomFeedbackAppWindow *win)
   GooroomFeedbackAppWindowPrivate *priv = NULL;
   GKeyFile *key_file = g_key_file_new ();
   GtkCssProvider *css_provider = gtk_css_provider_new ();
-  GtkWidget *gfb_button_new_dialog_label = gtk_label_new ("+ New");
+  GtkWidget *gfb_button_new_dialog_label = gtk_label_new (_("+ New"));
 
   priv = gooroom_feedback_app_window_get_instance_private (win);
   gtk_widget_init_template (GTK_WIDGET (win));

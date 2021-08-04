@@ -41,6 +41,10 @@ msgstr ""
 "\n"
 "피드백을 보내주셔서 감사합니다.\n"
 
+#: gooroom-feedback-window.c:49
+msgid "+ New"
+msgstr "+ 신규작성"
+
 #: gooroom-feedback-dialog.c:94
 msgid "FAILURE"
 msgstr "실패"
@@ -61,6 +65,10 @@ msgstr "성공"
 msgid "Cancel"
 msgstr "취소"
 
+#: gooroom-feedback-dialog.c:141
+msgid "Submit"
+msgstr "보내기"
+
 #: gooroom-feedback-dialog.ui:84
 msgid "Send us feedback."
 msgstr "피드백을 보내주세요."
@@ -71,11 +79,11 @@ msgstr "피드백 종류를 선택해주세요."
 
 #: gooroom-feedback-dialog.ui:122
 msgid " Problem"
-msgstr " 문제"
+msgstr " 기능 오류"
 
 #: gooroom-feedback-dialog.ui:139
 msgid " Suggestion"
-msgstr " 제안"
+msgstr " 의견 제시"
 
 #: gooroom-feedback-dialog.ui:174
 msgid "Title"
