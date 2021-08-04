@@ -2,6 +2,7 @@
 #define _GOOROOM_FEEDBACK_WINDOW_H_
 
 #include <time.h>
+#include <pwd.h>
 #include <gtk/gtk.h>
 #include <gio/gio.h>
 #include <glib/gi18n.h>

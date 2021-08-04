@@ -49,15 +49,21 @@ gooroom_feedback_app_window_init (GooroomFeedbackAppWindow *win)
   GKeyFile *key_file = g_key_file_new ();
   GtkCssProvider *css_provider = gtk_css_provider_new ();
   GtkWidget *gfb_button_new_dialog_label = gtk_label_new (_("+ New"));
+  uid_t uid;
+  struct passwd *pw;
 
   priv = gooroom_feedback_app_window_get_instance_private (win);
   gtk_widget_init_template (GTK_WIDGET (win));
 
-  if (g_key_file_load_from_file (key_file, GFB_CONF, G_KEY_FILE_NONE, NULL))
-  {
-    priv->gfb_history = g_key_file_get_string (key_file, "SERVER", "history", NULL);
-    g_key_file_free (key_file);
+  uid = geteuid ();
+  pw = getpwuid (uid);
+
+  if (pw == NULL) {
+    fprintf (stderr, "getpwuid() Failed.\n");
+    exit (EXIT_FAILURE);
   }
+
+  priv->gfb_history = g_strconcat (pw->pw_dir, "/.local/share/gooroom-feedback.log", NULL);
 
   gtk_css_provider_load_from_resource (css_provider, GOOROOM_FEEDBACK_CSS);
   gtk_style_context_add_provider_for_screen (gdk_screen_get_default(),

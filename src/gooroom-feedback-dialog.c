@@ -81,6 +81,10 @@ gfb_submit_button_clicked (GtkButton *widget,
       server_response = _("SUCCESS");
       response_msg = _("\nThanks for taking the time to give us feedback.\n");
       history = fopen (priv->gfb_history, "a");
+      if (history == NULL) {
+        fprintf (stderr, "fopen() Failed.\n");
+        return;
+      }
       fprintf (history, "%s::%s::%s::%s::%s\n",
                time_str,
                title,
@@ -139,6 +143,7 @@ gooroom_feedback_dialog_init (GooroomFeedbackDialog *self)
   GKeyFile *key_file = g_key_file_new ();
   GtkCssProvider *css_provider = gtk_css_provider_new ();
   GtkWidget *gfb_button_submit_label = gtk_label_new (_("Submit"));
+  struct passwd *pw;
 
   priv = gooroom_feedback_dialog_get_instance_private (self);
   gtk_widget_init_template (GTK_WIDGET (self));
@@ -149,9 +154,16 @@ gooroom_feedback_dialog_init (GooroomFeedbackDialog *self)
                                  NULL))
   {
     priv->server_url = g_key_file_get_string (key_file, "SERVER", "address", NULL);
-    priv->gfb_history = g_key_file_get_string (key_file, "SERVER", "history", NULL);
     g_key_file_free (key_file);
   }
+
+  pw = getpwuid (geteuid ());
+  if (pw == NULL) {
+    fprintf (stderr, "getpwuid() Failed.\n");
+    return;
+  }
+
+  priv->gfb_history = g_strconcat (pw->pw_dir, "/.local/share/gooroom-feedback.log", NULL);
 
   gtk_css_provider_load_from_resource (css_provider, GOOROOM_FEEDBACK_CSS);
   gtk_style_context_add_provider_for_screen (gdk_screen_get_default(),

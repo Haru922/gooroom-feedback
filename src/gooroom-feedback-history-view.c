@@ -37,8 +37,19 @@ gooroom_feedback_history_view_get_items (GtkWidget *gfb_history_box,
   uid_t uid;
   gchar **segments = NULL;
 
-  uid = geteuid ();
-  pw = getpwuid (uid);
+  gfb_history_init_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 10);
+  gtk_box_pack_start (GTK_BOX (gfb_history_init_box),
+                      gtk_image_new_from_resource (GFB_RESOURCE_INIT),
+                      FALSE, FALSE, 5);
+  gfb_history_label = gtk_label_new (_("Feedback History"));
+  gtk_widget_set_name (gfb_history_label,
+                       "gfb-history-info-label");
+  gtk_box_pack_start (GTK_BOX (gfb_history_init_box),
+                      gfb_history_label,
+                      FALSE, FALSE, 5);
+  gtk_box_pack_start (GTK_BOX (gfb_history_box),
+                      gfb_history_init_box,
+                      FALSE, FALSE, 0);
 
   if (fp = fopen (gfb_history, "r"))
   {
@@ -78,25 +89,12 @@ gooroom_feedback_history_view_get_items (GtkWidget *gfb_history_box,
                             FALSE, FALSE, 5);
         gtk_container_add (GTK_CONTAINER (gfb_history_button),
                            gfb_history_info);
-        gtk_box_pack_end (GTK_BOX (gfb_history_box),
-                          gfb_history_button,
-                          FALSE, FALSE, 0);
+        gtk_box_pack_start (GTK_BOX (gfb_history_box),
+                            gfb_history_button,
+                            FALSE, FALSE, 0);
         g_strfreev (segments);
         segments = NULL;
     }
     fclose (fp);
   }
-  gfb_history_init_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 10);
-  gtk_box_pack_start (GTK_BOX (gfb_history_init_box),
-                      gtk_image_new_from_resource (GFB_RESOURCE_INIT),
-                      FALSE, FALSE, 5);
-  gfb_history_label = gtk_label_new (_("Feedback History"));
-  gtk_widget_set_name (gfb_history_label,
-                       "gfb-history-info-label");
-  gtk_box_pack_start (GTK_BOX (gfb_history_init_box),
-                      gfb_history_label,
-                      FALSE, FALSE, 5);
-  gtk_box_pack_start (GTK_BOX (gfb_history_box),
-                      gfb_history_init_box,
-                      FALSE, FALSE, 0);
 }
