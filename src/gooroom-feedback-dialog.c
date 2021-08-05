@@ -89,7 +89,7 @@ gfb_submit_button_clicked (GtkButton *widget,
                time_str,
                title,
                category,
-               description,
+               g_strescape (description, NULL),
                server_response);
       fclose (history);
     }
@@ -97,12 +97,14 @@ gfb_submit_button_clicked (GtkButton *widget,
     {
       server_response = _("FAILURE");
       response_msg = _("\nInternal Server Error.\n");
+      /*
       // DELETE START
       history = fopen (priv->gfb_history, "a");
       fprintf (history, "%s::%s::%s::%s::%s\n",
                time_str, title, category, description, server_response);
       fclose (history);
       // END
+      */
     }
     g_free (description);
     if (release)
@@ -153,7 +155,9 @@ gooroom_feedback_dialog_init (GooroomFeedbackDialog *self)
                                  G_KEY_FILE_NONE,
                                  NULL))
   {
-    priv->server_url = g_key_file_get_string (key_file, "SERVER", "address", NULL);
+    priv->server_url = g_strconcat (g_key_file_get_string (key_file, "SERVER", "address", NULL),
+                                    "/gooroom/feedback/new",
+                                    NULL);
     g_key_file_free (key_file);
   }
 

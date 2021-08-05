@@ -18,7 +18,20 @@ gooroom_feedback_history_view_init (GtkWidget *gfb_history_view,
 static void
 gfb_history_button_clicked (GtkButton *widget, gpointer user_data)
 {
-  g_print ("%s\n", (char*) user_data);
+  GtkWidget *dialog = gtk_message_dialog_new (NULL,
+                                              GTK_DIALOG_MODAL,
+                                              GTK_MESSAGE_INFO,
+                                              GTK_BUTTONS_CLOSE,
+                                              g_strcompress ((char *) user_data),
+                                              NULL);
+  gtk_widget_set_name (dialog,
+                       "gfb-description-dialog");
+  gtk_window_set_title (GTK_WINDOW (dialog),
+                        _("Gooroom Feedback"));
+  g_signal_connect_swapped (dialog, "response",
+                            G_CALLBACK (gtk_widget_destroy),
+                            dialog);
+  gtk_dialog_run (GTK_DIALOG (dialog));
 }
 
 void
@@ -50,6 +63,9 @@ gooroom_feedback_history_view_get_items (GtkWidget *gfb_history_box,
   gtk_box_pack_start (GTK_BOX (gfb_history_box),
                       gfb_history_init_box,
                       FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (gfb_history_box),
+                      gtk_separator_new (GTK_ORIENTATION_HORIZONTAL),
+                      FALSE, FALSE, 5);
 
   if (fp = fopen (gfb_history, "r"))
   {
